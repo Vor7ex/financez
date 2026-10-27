@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -37,6 +38,18 @@ class OnboardingViewModelTest {
 
         val state = viewModel.uiState.value
         assertTrue("El estado inicial debe mostrar la selección de moneda", state is OnboardingUiState.SelectCurrency)
+    }
+
+    @Test
+    fun confirming_currency_persists_base_currency_and_marks_onboarding_completed() = runTest {
+        val fakeRepo = FakeUserPreferencesRepository(initialCurrency = null)
+        val viewModel = OnboardingViewModel(preferencesRepository = fakeRepo)
+
+        viewModel.confirmCurrency("USD")
+
+        val currentCurrency = fakeRepo.baseCurrency.first()
+        assertEquals("USD", currentCurrency)
+        assertTrue("El estado debe indicar que se completó el onboarding", viewModel.uiState.value is OnboardingUiState.Completed)
     }
 }
 
