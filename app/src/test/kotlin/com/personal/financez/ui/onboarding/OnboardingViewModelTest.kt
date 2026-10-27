@@ -51,6 +51,15 @@ class OnboardingViewModelTest {
         assertEquals("USD", currentCurrency)
         assertTrue("El estado debe indicar que se completó el onboarding", viewModel.uiState.value is OnboardingUiState.Completed)
     }
+
+    @Test
+    fun initial_state_navigates_to_main_when_base_currency_already_configured() = runTest {
+        val fakeRepo = FakeUserPreferencesRepository(initialCurrency = "COP")
+        val viewModel = OnboardingViewModel(preferencesRepository = fakeRepo)
+
+        val state = viewModel.uiState.value
+        assertTrue("Si ya hay moneda configurada, el estado debe ser Completed", state is OnboardingUiState.Completed)
+    }
 }
 
 class FakeUserPreferencesRepository(initialCurrency: String? = null) : UserPreferencesRepository {
