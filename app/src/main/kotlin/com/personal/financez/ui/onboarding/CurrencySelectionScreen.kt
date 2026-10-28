@@ -88,6 +88,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -374,14 +375,14 @@ fun CurrencySelectionScreen(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // 4. Botón de exploración del catálogo completo
                 SearchTriggerField(
                     onClick = { showFullCatalogSheet = true }
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -600,7 +601,8 @@ fun QuickSelectionSection(
 }
 
 /**
- * Botón para abrir el catálogo completo de divisas.
+ * Botón para abrir el catálogo completo de divisas, con las mismas dimensiones,
+ * estilo, color y tipografía que los selectores de moneda.
  */
 @Composable
 fun SearchTriggerField(
@@ -614,7 +616,7 @@ fun SearchTriggerField(
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isInteracting = isPressed || isHovered
 
-    val scale by animateFloatAsState(
+    val itemScale by animateFloatAsState(
         targetValue = if (isInteracting) 0.98f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -623,44 +625,62 @@ fun SearchTriggerField(
         label = "searchBtnScale"
     )
 
-    Surface(
-        onClick = onClick,
-        interactionSource = interactionSource,
+    val borderColor by animateColorAsState(
+        targetValue = if (isInteracting) colors.outline.copy(alpha = 0.40f) else colors.outline.copy(alpha = 0.18f),
+        animationSpec = tween(150),
+        label = "searchBorder"
+    )
+
+    Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(64.dp)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-        shape = RoundedCornerShape(14.dp),
-        color = colors.surface,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (isInteracting) colors.outline.copy(alpha = 0.45f) else colors.outline.copy(alpha = 0.25f)
-        )
+                scaleX = itemScale
+                scaleY = itemScale
+            }
+            .clip(RoundedCornerShape(14.dp))
+            .background(colors.surface)
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
+            .semantics {
+                role = Role.Button
+                onClick {
+                    onClick()
+                    true
+                }
+            }
+            .pointerInput(onClick) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        interactionSource.emit(press)
+                        if (tryAwaitRelease()) {
+                            interactionSource.emit(PressInteraction.Release(press))
+                        } else {
+                            interactionSource.emit(PressInteraction.Cancel(press))
+                        }
+                    },
+                    onTap = { onClick() }
+                )
+            }
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = colors.primary,
-                modifier = Modifier.size(20.dp)
-            )
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            tint = colors.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
 
-            Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
-            Text(
-                text = "Buscar otra divisa",
-                style = typography.labelLarge,
-                color = colors.onSurface
-            )
-        }
+        Text(
+            text = "Buscar en otra divisa",
+            style = typography.titleMedium,
+            color = colors.onSurface
+        )
     }
 }
 
@@ -722,6 +742,7 @@ fun TactileCurrencyItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(64.dp)
             .graphicsLayer {
                 scaleX = itemScale
                 scaleY = itemScale
@@ -752,7 +773,7 @@ fun TactileCurrencyItem(
                     }
                 )
             }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
@@ -1026,8 +1047,7 @@ fun CurrencyCatalogSheet(
 }
 
 /**
- * Botón estático y reutilizable de confirmación.
- * Fuente: Monospace, peso bold, letter spacing amplio, sin flechas ni textos dinámicos.
+ * Botón estático y reutilizable de confirmación con acabado metálico cepillado tenue.
  */
 @Composable
 fun ConfirmButton(
@@ -1037,16 +1057,33 @@ fun ConfirmButton(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
+    // Gradiente metálico muy sutil derivado de tokens semánticos (micro-brillo FrostedIceMint y sombra DarkHunter)
+    val highlight = lerp(colors.primary, colors.onSecondary, 0.10f)
+    val base = colors.primary
+    val shadow = lerp(colors.primary, colors.secondary, 0.08f)
+
+    val metallicBrush = Brush.linearGradient(
+        0.0f to highlight,
+        0.35f to base,
+        0.65f to shadow,
+        1.0f to highlight,
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+    )
+
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(metallicBrush),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colors.primary,
+            containerColor = Color.Transparent,
             contentColor = colors.onPrimary
-        )
+        ),
+        contentPadding = PaddingValues(0.dp)
     ) {
         Text(
             text = "CONFIRMAR",
@@ -1082,7 +1119,7 @@ fun BottomConfirmationBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .padding(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 ConfirmButton(onClick = onConfirm)
             }
