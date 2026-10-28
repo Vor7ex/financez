@@ -733,6 +733,7 @@ fun TactileCurrencyItem(
     ) {
         Row(
             modifier = Modifier
+                .width(84.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(colors.background)
                 .border(
@@ -740,17 +741,19 @@ fun TactileCurrencyItem(
                     color = if (isSelected) colors.primary.copy(alpha = 0.4f) else colors.outline.copy(alpha = 0.25f),
                     shape = RoundedCornerShape(8.dp)
                 )
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = currency.flagEmoji,
                 fontSize = 20.sp
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = currency.code,
                 style = typography.labelMedium,
+                maxLines = 1,
                 color = if (isSelected) colors.primary else colors.onSurface
             )
         }
