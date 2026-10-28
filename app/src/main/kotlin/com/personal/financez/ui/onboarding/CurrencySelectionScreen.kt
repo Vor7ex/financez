@@ -23,7 +23,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +96,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -723,11 +729,29 @@ fun TactileCurrencyItem(
             .clip(RoundedCornerShape(14.dp))
             .background(containerColor)
             .border(borderWidth, borderColor, RoundedCornerShape(14.dp))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onSelect
-            )
+            .semantics {
+                role = Role.Button
+                onClick {
+                    onSelect()
+                    true
+                }
+            }
+            .pointerInput(onSelect) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        interactionSource.emit(press)
+                        if (tryAwaitRelease()) {
+                            interactionSource.emit(PressInteraction.Release(press))
+                        } else {
+                            interactionSource.emit(PressInteraction.Cancel(press))
+                        }
+                    },
+                    onTap = {
+                        onSelect()
+                    }
+                )
+            }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
