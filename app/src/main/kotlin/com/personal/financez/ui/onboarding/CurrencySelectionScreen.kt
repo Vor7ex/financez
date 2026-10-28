@@ -116,28 +116,44 @@ fun CurrencySelectionScreen(
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val pullOffset = remember { Animatable(0f) }
-    val maxPullDistance = 90.dp
+    val maxPullDistance = 50.dp
     val density = LocalDensity.current
     val maxPullPx = with(density) { maxPullDistance.toPx() }
 
     var isLatched by remember { mutableStateOf(false) }
     var hasVibratedThisPull by remember { mutableStateOf(false) }
+    var touchStartedWithLogoDeployed by remember { mutableStateOf(false) }
 
-    val nestedScrollConnection = remember {
+    val nestedScrollConnection = remember(maxPullPx) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Si el logo está anclado en el techo y el usuario desliza hacia arriba, se desengancha y se esconde
-                if (isLatched && available.y < 0) {
-                    isLatched = false
-                    hasVibratedThisPull = false
-                    coroutineScope.launch {
-                        pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
+                // 1. Cuando el logo está desplegado y el usuario arrastra hacia arriba (para esconderlo)
+                if (available.y < 0 && pullOffset.value > 0f) {
+                    if (isLatched) {
+                        isLatched = false
                     }
-                    return Offset.Zero
+
+                    val newOffset = (pullOffset.value + available.y).coerceAtLeast(0f)
+                    val consumedY = newOffset - pullOffset.value
+
+                    coroutineScope.launch { pullOffset.snapTo(newOffset) }
+
+                    // Si alcanzó 0 en este evento y fue un deslizamiento brusco/rápido (< -30f),
+                    // consumimos todo el delta disponible para que la lista no salte antes de que onPreFling
+                    // mate el momento residual.
+                    if (newOffset == 0f && available.y < -30f) {
+                        return Offset(0f, available.y)
+                    }
+
+                    return Offset(0f, consumedY)
                 }
 
-                // 1. Deslizamiento elástico hacia abajo en el tope superior
+                // 2. Deslizamiento elástico hacia abajo en el tope superior
                 if (available.y > 0 && scrollState.value == 0) {
+                    if (pullOffset.value == 0f) {
+                        hasVibratedThisPull = false
+                    }
+
                     val friction = (1f - (pullOffset.value / (maxPullPx * 1.6f))).coerceIn(0.2f, 0.5f)
                     val newOffset = (pullOffset.value + available.y * friction).coerceAtMost(maxPullPx)
 
@@ -152,21 +168,27 @@ fun CurrencySelectionScreen(
                     return Offset(0f, available.y)
                 }
 
-                // 2. Colapsar pullOffset si el usuario arrastra hacia arriba antes de fijarlo
-                if (available.y < 0 && pullOffset.value > 0f) {
-                    val newOffset = (pullOffset.value + available.y).coerceAtLeast(0f)
-                    val consumed = newOffset - pullOffset.value
-                    if (newOffset < maxPullPx) {
-                        isLatched = false
-                    }
-                    coroutineScope.launch { pullOffset.snapTo(newOffset) }
-                    return Offset(0f, consumed)
-                }
-
                 return Offset.Zero
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
+                // Excepción: Cuando se despliega el logo y el usuario desliza para esconderlo:
+                // Si hace un deslizamiento rápido y brusco hacia arriba (fling):
+                // - El scroll se detiene de inmediato en el inicio de la página (scrollState = 0).
+                // - Se elimina todo el momento residual (consumiendo available).
+                // - Si el usuario quiere scrollear le tocará deslizar de nuevo.
+                if (touchStartedWithLogoDeployed && available.y < -250f && scrollState.value < 40) {
+                    isLatched = false
+                    hasVibratedThisPull = false
+                    if (scrollState.value > 0) {
+                        scrollState.scrollTo(0)
+                    }
+                    coroutineScope.launch {
+                        pullOffset.animateTo(0f, tween(durationMillis = 150, easing = FastOutSlowInEasing))
+                    }
+                    return available
+                }
+
                 if (isLatched) {
                     pullOffset.animateTo(maxPullPx, tween(durationMillis = 150, easing = FastOutSlowInEasing))
                 } else if (pullOffset.value > 0f) {
@@ -229,6 +251,7 @@ fun CurrencySelectionScreen(
     ) { innerPadding ->
         val pullProgress = (pullOffset.value / maxPullPx).coerceIn(0f, 1f)
         val pullHeightDp = with(density) { pullOffset.value.toDp() }
+        val topSpacerHeight = (20.dp - (12.dp * pullProgress)).coerceAtLeast(8.dp)
 
         CompositionLocalProvider(
             LocalOverscrollConfiguration provides null
@@ -241,9 +264,8 @@ fun CurrencySelectionScreen(
                     .pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown(requireUnconsumed = false)
-                            if (!isLatched) {
-                                coroutineScope.launch { pullOffset.stop() }
-                            }
+                            touchStartedWithLogoDeployed = (isLatched || pullOffset.value > 0f)
+                            coroutineScope.launch { pullOffset.stop() }
                             do {
                                 val event = awaitPointerEvent()
                             } while (event.changes.any { it.pressed })
@@ -255,7 +277,7 @@ fun CurrencySelectionScreen(
                                     pullOffset.animateTo(maxPullPx, tween(durationMillis = 150, easing = FastOutSlowInEasing))
                                 }
                             } else if (pullOffset.value > 0f) {
-                                // Si no se tocó el límite (techo), simplemente se vuelve a esconder
+                                // Si no se tocó el límite (techo) o se desenganchó, se vuelve a esconder
                                 hasVibratedThisPull = false
                                 coroutineScope.launch {
                                     pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
@@ -287,7 +309,7 @@ fun CurrencySelectionScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(topSpacerHeight))
 
                 // 1. Cabecera editorial limpia centrada (sin "PASO 01")
                 BrandHeader()
