@@ -78,12 +78,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -112,41 +114,51 @@ fun CurrencySelectionScreen(
     val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
     val pullOffset = remember { Animatable(0f) }
     val maxPullDistance = 90.dp
     val density = LocalDensity.current
     val maxPullPx = with(density) { maxPullDistance.toPx() }
 
-    var snapBackJob by remember { mutableStateOf<Job?>(null) }
-
-    fun launchSnapBack(initialDelay: Long = 150L, duration: Int = 400) {
-        snapBackJob?.cancel()
-        snapBackJob = coroutineScope.launch {
-            if (initialDelay > 0 && pullOffset.value > 15f) {
-                delay(initialDelay)
-            }
-            pullOffset.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = duration, easing = FastOutSlowInEasing)
-            )
-        }
-    }
+    var isLatched by remember { mutableStateOf(false) }
+    var hasVibratedThisPull by remember { mutableStateOf(false) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Interceptar arrastre hacia abajo en el tope antes de que el scroll toque el techo
+                // Si el logo está anclado en el techo y el usuario desliza hacia arriba, se desengancha y se esconde
+                if (isLatched && available.y < 0) {
+                    isLatched = false
+                    hasVibratedThisPull = false
+                    coroutineScope.launch {
+                        pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
+                    }
+                    return Offset.Zero
+                }
+
+                // 1. Deslizamiento elástico hacia abajo en el tope superior
                 if (available.y > 0 && scrollState.value == 0) {
-                    val friction = (1f - (pullOffset.value / (maxPullPx * 1.8f))).coerceIn(0.25f, 0.55f)
+                    val friction = (1f - (pullOffset.value / (maxPullPx * 1.6f))).coerceIn(0.2f, 0.5f)
                     val newOffset = (pullOffset.value + available.y * friction).coerceAtMost(maxPullPx)
+
+                    // ¿Alcanzó el límite de elasticidad (el techo)?
+                    if (newOffset >= maxPullPx && !hasVibratedThisPull) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        hasVibratedThisPull = true
+                        isLatched = true
+                    }
+
                     coroutineScope.launch { pullOffset.snapTo(newOffset) }
                     return Offset(0f, available.y)
                 }
 
-                // Colapsar pullOffset si el usuario arrastra hacia arriba con el logo visible
+                // 2. Colapsar pullOffset si el usuario arrastra hacia arriba antes de fijarlo
                 if (available.y < 0 && pullOffset.value > 0f) {
                     val newOffset = (pullOffset.value + available.y).coerceAtLeast(0f)
                     val consumed = newOffset - pullOffset.value
+                    if (newOffset < maxPullPx) {
+                        isLatched = false
+                    }
                     coroutineScope.launch { pullOffset.snapTo(newOffset) }
                     return Offset(0f, consumed)
                 }
@@ -155,34 +167,33 @@ fun CurrencySelectionScreen(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                if (pullOffset.value > 0f) {
-                    launchSnapBack(initialDelay = 150L, duration = 400)
+                if (isLatched) {
+                    pullOffset.animateTo(maxPullPx, tween(durationMillis = 150, easing = FastOutSlowInEasing))
+                } else if (pullOffset.value > 0f) {
+                    hasVibratedThisPull = false
+                    pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
                 }
                 return Velocity.Zero
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // Al subir con fuerza desde abajo y chocar contra el tope con inercia
-                if (available.y > 60f && scrollState.value == 0) {
-                    snapBackJob?.cancel()
-                    snapBackJob = coroutineScope.launch {
-                        val impulse = (available.y * 0.05f).coerceIn(45f, maxPullPx)
-                        // 1. Expansión por impulso
-                        pullOffset.animateTo(
-                            targetValue = impulse,
-                            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)
-                        )
-                        // 2. Tiempo suspendido visible para lectura (~0.5s en total)
-                        delay(200)
-                        // 3. Regreso suave
-                        pullOffset.animateTo(
-                            targetValue = 0f,
-                            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                        )
+                if (available.y > 150f && scrollState.value == 0) {
+                    val target = (pullOffset.value + available.y * 0.04f)
+                    if (target >= maxPullPx) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        hasVibratedThisPull = true
+                        isLatched = true
+                        pullOffset.animateTo(maxPullPx, tween(durationMillis = 180, easing = FastOutSlowInEasing))
+                    } else {
+                        hasVibratedThisPull = false
+                        pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
                     }
                     return Velocity(0f, available.y)
+                } else if (isLatched) {
+                    pullOffset.animateTo(maxPullPx, tween(durationMillis = 150, easing = FastOutSlowInEasing))
                 } else if (pullOffset.value > 0f) {
-                    launchSnapBack(initialDelay = 150L, duration = 400)
+                    hasVibratedThisPull = false
+                    pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
                 }
                 return Velocity.Zero
             }
@@ -230,14 +241,25 @@ fun CurrencySelectionScreen(
                     .pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown(requireUnconsumed = false)
-                            // Detener de inmediato cualquier animación de retorno en curso
-                            snapBackJob?.cancel()
-                            coroutineScope.launch { pullOffset.stop() }
+                            if (!isLatched) {
+                                coroutineScope.launch { pullOffset.stop() }
+                            }
                             do {
                                 val event = awaitPointerEvent()
                             } while (event.changes.any { it.pressed })
-                            if (pullOffset.value > 0f) {
-                                launchSnapBack(initialDelay = 150L, duration = 400)
+
+                            // Al soltar el dedo:
+                            if (isLatched) {
+                                // Se queda anclado en el techo
+                                coroutineScope.launch {
+                                    pullOffset.animateTo(maxPullPx, tween(durationMillis = 150, easing = FastOutSlowInEasing))
+                                }
+                            } else if (pullOffset.value > 0f) {
+                                // Si no se tocó el límite (techo), simplemente se vuelve a esconder
+                                hasVibratedThisPull = false
+                                coroutineScope.launch {
+                                    pullOffset.animateTo(0f, tween(durationMillis = 200, easing = FastOutSlowInEasing))
+                                }
                             }
                         }
                     }
