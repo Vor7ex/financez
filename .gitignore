@@ -29,3 +29,6 @@ Thumbs.db
 
 # Local session logs (not versioned)
 docs/sessions/
+
+.agents
+skills-lock.json
