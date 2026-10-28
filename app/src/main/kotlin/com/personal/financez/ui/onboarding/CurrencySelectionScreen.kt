@@ -15,6 +15,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,6 +62,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,9 +98,11 @@ import com.personal.financez.data.currencies.Currency
 import com.personal.financez.data.currencies.CurrencyLoader
 import com.personal.financez.data.currencies.getFlagForCurrency
 import com.personal.financez.ui.theme.CreatoDisplay
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CurrencySelectionScreen(
     initialCurrency: String = "COP",
@@ -112,53 +117,72 @@ fun CurrencySelectionScreen(
     val density = LocalDensity.current
     val maxPullPx = with(density) { maxPullDistance.toPx() }
 
+    var snapBackJob by remember { mutableStateOf<Job?>(null) }
+
+    fun launchSnapBack(initialDelay: Long = 150L, duration: Int = 400) {
+        snapBackJob?.cancel()
+        snapBackJob = coroutineScope.launch {
+            if (initialDelay > 0 && pullOffset.value > 15f) {
+                delay(initialDelay)
+            }
+            pullOffset.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = duration, easing = FastOutSlowInEasing)
+            )
+        }
+    }
+
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Si el usuario desliza hacia arriba mientras está en overscroll, colapsamos el pullOffset
-                if (available.y < 0 && pullOffset.value > 0f) {
-                    val delta = available.y
-                    val newOffset = (pullOffset.value + delta).coerceAtLeast(0f)
-                    val consumed = newOffset - pullOffset.value
-                    coroutineScope.launch {
-                        pullOffset.snapTo(newOffset)
-                    }
-                    return Offset(0f, consumed)
-                }
-                return Offset.Zero
-            }
-
-            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // Solo reaccionar a arrastre directo del usuario (ignorar inercia/flings para evitar que se quede pegado)
-                if (source != NestedScrollSource.UserInput) return Offset.Zero
-
+                // Interceptar arrastre hacia abajo en el tope antes de que el scroll toque el techo
                 if (available.y > 0 && scrollState.value == 0) {
                     val friction = (1f - (pullOffset.value / (maxPullPx * 1.8f))).coerceIn(0.25f, 0.55f)
                     val newOffset = (pullOffset.value + available.y * friction).coerceAtMost(maxPullPx)
-                    coroutineScope.launch {
-                        pullOffset.snapTo(newOffset)
-                    }
+                    coroutineScope.launch { pullOffset.snapTo(newOffset) }
                     return Offset(0f, available.y)
                 }
+
+                // Colapsar pullOffset si el usuario arrastra hacia arriba con el logo visible
+                if (available.y < 0 && pullOffset.value > 0f) {
+                    val newOffset = (pullOffset.value + available.y).coerceAtLeast(0f)
+                    val consumed = newOffset - pullOffset.value
+                    coroutineScope.launch { pullOffset.snapTo(newOffset) }
+                    return Offset(0f, consumed)
+                }
+
                 return Offset.Zero
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
                 if (pullOffset.value > 0f) {
-                    pullOffset.animateTo(
-                        targetValue = 0f,
-                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                    )
+                    launchSnapBack(initialDelay = 150L, duration = 400)
                 }
                 return Velocity.Zero
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                if (pullOffset.value > 0f) {
-                    pullOffset.animateTo(
-                        targetValue = 0f,
-                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                    )
+                // Al subir con fuerza desde abajo y chocar contra el tope con inercia
+                if (available.y > 60f && scrollState.value == 0) {
+                    snapBackJob?.cancel()
+                    snapBackJob = coroutineScope.launch {
+                        val impulse = (available.y * 0.05f).coerceIn(45f, maxPullPx)
+                        // 1. Expansión por impulso
+                        pullOffset.animateTo(
+                            targetValue = impulse,
+                            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)
+                        )
+                        // 2. Tiempo suspendido visible para lectura (~0.5s en total)
+                        delay(200)
+                        // 3. Regreso suave
+                        pullOffset.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
+                        )
+                    }
+                    return Velocity(0f, available.y)
+                } else if (pullOffset.value > 0f) {
+                    launchSnapBack(initialDelay = 150L, duration = 400)
                 }
                 return Velocity.Zero
             }
@@ -195,80 +219,82 @@ fun CurrencySelectionScreen(
         val pullProgress = (pullOffset.value / maxPullPx).coerceIn(0f, 1f)
         val pullHeightDp = with(density) { pullOffset.value.toDp() }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .nestedScroll(nestedScrollConnection)
-                .pointerInput(Unit) {
-                    awaitEachGesture {
-                        awaitFirstDown(requireUnconsumed = false)
-                        do {
-                            val event = awaitPointerEvent()
-                        } while (event.changes.any { it.pressed })
-                        if (pullOffset.value > 0f) {
-                            coroutineScope.launch {
-                                pullOffset.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                                )
+        CompositionLocalProvider(
+            LocalOverscrollConfiguration provides null
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .nestedScroll(nestedScrollConnection)
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            // Detener de inmediato cualquier animación de retorno en curso
+                            snapBackJob?.cancel()
+                            coroutineScope.launch { pullOffset.stop() }
+                            do {
+                                val event = awaitPointerEvent()
+                            } while (event.changes.any { it.pressed })
+                            if (pullOffset.value > 0f) {
+                                launchSnapBack(initialDelay = 150L, duration = 400)
                             }
                         }
                     }
-                }
-                .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Revelación lúdica de FINANCEZ al deslizar hacia abajo desde el tope
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(pullHeightDp)
-                    .graphicsLayer {
-                        alpha = pullProgress
-                        scaleX = 0.65f + 0.35f * pullProgress
-                        scaleY = 0.65f + 0.35f * pullProgress
-                    },
-                contentAlignment = Alignment.Center
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (pullOffset.value > 4f) {
-                    FinanceZLogo(
-                        baseFontSize = 18.sp,
-                        accentFontSize = 24.sp
-                    )
+                // Revelación lúdica de FINANCEZ al deslizar hacia abajo desde el tope
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(pullHeightDp)
+                        .graphicsLayer {
+                            alpha = pullProgress
+                            scaleX = 0.65f + 0.35f * pullProgress
+                            scaleY = 0.65f + 0.35f * pullProgress
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (pullOffset.value > 4f) {
+                        FinanceZLogo(
+                            baseFontSize = 18.sp,
+                            accentFontSize = 24.sp
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // 1. Cabecera editorial limpia centrada (sin "PASO 01")
+                BrandHeader()
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // 2. Tarjeta Hero con la divisa actualmente seleccionada (sin metadatos técnicos)
+                SelectedCurrencyCard(currency = selectedCurrency)
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // 3. Selección rápida de monedas frecuentes (sin inscripción "ISO 4217")
+                QuickSelectionSection(
+                    selectedCode = selectedCurrency.code,
+                    onSelectCurrency = { currency ->
+                        selectedCode = currency.code
+                        selectedName = currency.name
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // 4. Barra de búsqueda reordenada DESPUÉS de selección rápida (sin "catálogo")
+                SearchTriggerField(
+                    onClick = { showFullCatalogSheet = true }
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // 1. Cabecera editorial limpia centrada (sin "PASO 01")
-            BrandHeader()
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 2. Tarjeta Hero con la divisa actualmente seleccionada (sin metadatos técnicos)
-            SelectedCurrencyCard(currency = selectedCurrency)
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // 3. Selección rápida de monedas frecuentes (sin inscripción "ISO 4217")
-            QuickSelectionSection(
-                selectedCode = selectedCurrency.code,
-                onSelectCurrency = { currency ->
-                    selectedCode = currency.code
-                    selectedName = currency.name
-                }
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 4. Barra de búsqueda reordenada DESPUÉS de selección rápida (sin "catálogo")
-            SearchTriggerField(
-                onClick = { showFullCatalogSheet = true }
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
