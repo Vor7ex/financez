@@ -23,111 +23,111 @@ val CoolveticaHeavy = FontFamily(
     Font(R.font.coolvetica_hv_comp, FontWeight.Black)
 )
 
-// Tipografía semántica de FinanceZ basada en Material 3
+// Tipografía semántica de FinanceZ basada en Material 3 con escala visual amplia para Coolvetica
 val FinanceZTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 57.sp,
-        lineHeight = 64.sp,
-        letterSpacing = (-0.25).sp
+        fontSize = 68.sp,
+        lineHeight = 72.sp,
+        letterSpacing = (-0.5).sp
     ),
     displayMedium = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 45.sp,
-        lineHeight = 52.sp,
-        letterSpacing = 0.sp
+        fontSize = 52.sp,
+        lineHeight = 58.sp,
+        letterSpacing = (-0.25).sp
     ),
     displaySmall = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.Normal,
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
+        fontSize = 42.sp,
+        lineHeight = 48.sp,
         letterSpacing = 0.sp
     ),
     headlineLarge = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = 0.sp
+        fontSize = 40.sp,
+        lineHeight = 46.sp,
+        letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
         letterSpacing = 0.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.Medium,
-        fontSize = 24.sp,
+        fontSize = 26.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
         letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
         letterSpacing = 0.15.sp
     ),
     titleSmall = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
         letterSpacing = 0.1.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = Coolvetica,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.25.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = Coolvetica,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 17.sp,
+        lineHeight = 24.sp,
         letterSpacing = 0.25.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = Coolvetica,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.4.sp
     ),
     labelLarge = TextStyle(
         fontFamily = CoolveticaHeavy,
         fontWeight = FontWeight.Black,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 1.5.sp
+        fontSize = 50.sp,
+        lineHeight = 50.sp,
+        letterSpacing = 5.2.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontFamily = CoolveticaHeavy,
+        fontWeight = FontWeight.Black,
+        fontSize = 15.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 1.2.sp
     ),
     labelSmall = TextStyle(
         fontFamily = Coolvetica,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 1.2.sp
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 1.4.sp
     )
 )

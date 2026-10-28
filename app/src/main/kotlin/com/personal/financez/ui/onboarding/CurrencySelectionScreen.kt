@@ -67,8 +67,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -173,6 +171,7 @@ fun CurrencySelectionScreen(
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -185,9 +184,7 @@ fun BrandHeader(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "FINANCEZ",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 2.sp,
+                style = typography.labelLarge,
                 color = colors.onBackground
             )
         }
@@ -196,20 +193,16 @@ fun BrandHeader(modifier: Modifier = Modifier) {
 
         Text(
             text = "Bienvenido",
-            fontSize = 34.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = colors.onBackground,
-            letterSpacing = (-1).sp,
-            lineHeight = 38.sp
+            style = typography.headlineLarge,
+            color = colors.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Elige la moneda base de tus finanzas. Todas tus cuentas, métricas y balances se consolidarán en esta divisa.",
-            fontSize = 14.sp,
-            color = colors.onSurfaceVariant,
-            lineHeight = 21.sp
+            style = typography.bodyLarge,
+            color = colors.onSurfaceVariant
         )
     }
 }
@@ -223,6 +216,7 @@ fun SelectedCurrencyCard(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Box(
         modifier = modifier
@@ -264,16 +258,13 @@ fun SelectedCurrencyCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = targetCurrency.code,
-                                fontSize = 36.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = (-1).sp,
+                                style = typography.displayMedium,
                                 color = colors.onSurface
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = targetCurrency.flagEmoji,
-                                fontSize = 26.sp
+                                fontSize = 32.sp
                             )
                         }
 
@@ -281,8 +272,7 @@ fun SelectedCurrencyCard(
 
                         Text(
                             text = targetCurrency.name,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = typography.titleLarge,
                             color = colors.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -307,14 +297,12 @@ fun SelectedCurrencyCard(
             ) {
                 Text(
                     text = "Formato de balance",
-                    fontSize = 12.sp,
+                    style = typography.bodyMedium,
                     color = colors.onSurfaceVariant
                 )
                 Text(
                     text = "${currency.code} 1,250,000.00",
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.SemiBold,
+                    style = typography.titleSmall,
                     color = colors.onSurface
                 )
             }
@@ -332,14 +320,12 @@ fun QuickSelectionSection(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "SELECCIÓN RÁPIDA",
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.4.sp,
+            style = typography.labelSmall,
             color = colors.onSurfaceVariant
         )
 
@@ -370,6 +356,7 @@ fun SearchTriggerField(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Row(
         modifier = modifier
@@ -385,14 +372,14 @@ fun SearchTriggerField(
             imageVector = Icons.Default.Search,
             contentDescription = null,
             tint = colors.primary,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(22.dp)
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Text(
             text = "Buscar entre más de 50 divisas...",
-            fontSize = 14.sp,
+            style = typography.bodyLarge,
             color = colors.onSurfaceVariant,
             modifier = Modifier.weight(1f)
         )
@@ -410,6 +397,7 @@ fun TactileCurrencyItem(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) colors.primary.copy(alpha = 0.08f) else colors.surface,
@@ -463,14 +451,12 @@ fun TactileCurrencyItem(
         ) {
             Text(
                 text = currency.flagEmoji,
-                fontSize = 16.sp
+                fontSize = 20.sp
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = currency.code,
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
+                style = typography.titleMedium,
                 color = if (isSelected) colors.primary else colors.onSurface
             )
         }
@@ -479,8 +465,7 @@ fun TactileCurrencyItem(
 
         Text(
             text = currency.name,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            style = typography.bodyLarge,
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -489,7 +474,7 @@ fun TactileCurrencyItem(
 
         Box(
             modifier = Modifier
-                .size(22.dp)
+                .size(24.dp)
                 .scale(checkScale)
                 .clip(CircleShape)
                 .background(if (isSelected) colors.primary else Color.Transparent)
@@ -505,7 +490,7 @@ fun TactileCurrencyItem(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Seleccionada",
                     tint = colors.onPrimary,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
@@ -523,6 +508,7 @@ fun CatalogCurrencyRow(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Row(
         modifier = modifier
@@ -540,15 +526,14 @@ fun CatalogCurrencyRow(
     ) {
         Text(
             text = currency.flagEmoji,
-            fontSize = 22.sp
+            fontSize = 24.sp
         )
 
         Spacer(modifier = Modifier.width(14.dp))
 
         Text(
             text = currency.name,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            style = typography.titleMedium,
             color = colors.onSurface,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -565,9 +550,7 @@ fun CatalogCurrencyRow(
         ) {
             Text(
                 text = currency.code,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
+                style = typography.labelMedium,
                 color = if (isSelected) colors.onPrimary else colors.onSurfaceVariant
             )
         }
@@ -587,6 +570,7 @@ fun CurrencyCatalogSheet(
 ) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
     val allCurrencies = remember { CurrencyLoader.loadAllCurrencies(context) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
 
@@ -623,15 +607,12 @@ fun CurrencyCatalogSheet(
                 Column {
                     Text(
                         text = "Seleccionar divisa",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = (-0.5).sp,
+                        style = typography.headlineMedium,
                         color = colors.onBackground
                     )
                     Text(
                         text = "${filteredCurrencies.size} divisas disponibles",
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace,
+                        style = typography.bodyMedium,
                         color = colors.onSurfaceVariant
                     )
                 }
@@ -658,11 +639,12 @@ fun CurrencyCatalogSheet(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
+                textStyle = typography.bodyLarge.copy(color = colors.onSurface),
                 placeholder = {
                     Text(
                         text = "Buscar por moneda o código (ej. CLP)...",
-                        color = colors.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontSize = 14.sp
+                        style = typography.bodyLarge,
+                        color = colors.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 },
                 leadingIcon = {
@@ -710,15 +692,13 @@ fun CurrencyCatalogSheet(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "404",
-                            fontSize = 28.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
+                            style = typography.displayMedium,
                             color = colors.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Sin resultados para \"$searchQuery\"",
-                            fontSize = 14.sp,
+                            style = typography.bodyLarge,
                             color = colors.onSurfaceVariant
                         )
                     }
@@ -754,6 +734,7 @@ fun ConfirmButton(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
 
     Button(
         onClick = onClick,
@@ -768,10 +749,7 @@ fun ConfirmButton(
     ) {
         Text(
             text = "CONFIRMAR",
-            fontSize = 15.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp
+            style = typography.labelLarge
         )
     }
 }
