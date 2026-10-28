@@ -5,17 +5,16 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
 private val FinanceZColorScheme = darkColorScheme(
-    primary = MutedTeal,
-    onPrimary = DarkCoffee,
-    primaryContainer = DarkCoffee,
-    onPrimaryContainer = LightBronze,
-    secondary = LightBronze,
-    onSecondary = DarkCoffee,
-    error = ScarletRush,
-    background = BackgroundDark,
-    onBackground = TextWhite,
-    surface = SurfaceCardDark,
-    onSurface = TextWhite
+    primary = OceanMist,
+    onPrimary = DarkKhakiDeep,
+    secondary = HunterGreen,
+    onSecondary = FrostedMint,
+    background = DarkKhakiDeep,
+    onBackground = FrostedMint,
+    surface = DarkKhakiMedium,
+    onSurface = FrostedMint,
+    onSurfaceVariant = FrostedMint.copy(alpha = 0.65f),
+    outline = HunterGreen
 )
 
 @Composable

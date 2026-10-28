@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -45,13 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.financez.data.currencies.Currency
 import com.personal.financez.data.currencies.CurrencyLoader
-import com.personal.financez.ui.theme.BackgroundDark
-import com.personal.financez.ui.theme.DarkCoffee
-import com.personal.financez.ui.theme.LightBronze
-import com.personal.financez.ui.theme.MutedTeal
-import com.personal.financez.ui.theme.SurfaceCardDark
-import com.personal.financez.ui.theme.TextMuted
-import com.personal.financez.ui.theme.TextWhite
 
 @Composable
 fun CurrencySelectionScreen(
@@ -75,11 +69,13 @@ fun CurrencySelectionScreen(
         }
     }
 
+    val colors = MaterialTheme.colorScheme
+
     Scaffold(
-        containerColor = BackgroundDark,
+        containerColor = colors.background,
         bottomBar = {
             Surface(
-                color = BackgroundDark,
+                color = colors.background,
                 shadowElevation = 8.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -95,8 +91,8 @@ fun CurrencySelectionScreen(
                             .height(56.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MutedTeal,
-                            contentColor = DarkCoffee
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         )
                     ) {
                         Text(
@@ -117,31 +113,31 @@ fun CurrencySelectionScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Buscador para facilitar encontrar una moneda entre las 178 opciones
+            // Buscador para filtrar rápidamente entre las 178 opciones
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = "Buscar moneda o código...", color = TextMuted)
+                    Text(text = "Buscar moneda o código...", color = colors.onSurfaceVariant)
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Buscar",
-                        tint = TextMuted
+                        tint = colors.onSurfaceVariant
                     )
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = TextWhite,
-                    unfocusedTextColor = TextWhite,
-                    focusedContainerColor = SurfaceCardDark,
-                    unfocusedContainerColor = SurfaceCardDark,
-                    focusedBorderColor = LightBronze,
+                    focusedTextColor = colors.onSurface,
+                    unfocusedTextColor = colors.onSurface,
+                    focusedContainerColor = colors.surface,
+                    unfocusedContainerColor = colors.surface,
+                    focusedBorderColor = colors.primary,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = LightBronze
+                    cursorColor = colors.primary
                 )
             )
 
@@ -173,8 +169,9 @@ private fun CurrencyRow(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (isSelected) MutedTeal else Color.Transparent
-    val backgroundColor = if (isSelected) SurfaceCardDark.copy(alpha = 0.9f) else SurfaceCardDark
+    val colors = MaterialTheme.colorScheme
+    val borderColor = if (isSelected) colors.primary else Color.Transparent
+    val backgroundColor = if (isSelected) colors.surface.copy(alpha = 0.95f) else colors.surface
 
     Row(
         modifier = Modifier
@@ -194,7 +191,7 @@ private fun CurrencyRow(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (isSelected) MutedTeal.copy(alpha = 0.2f) else DarkCoffee)
+                .background(if (isSelected) colors.primary.copy(alpha = 0.2f) else colors.secondary.copy(alpha = 0.4f))
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -202,7 +199,7 @@ private fun CurrencyRow(
                 text = currency.code,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = if (isSelected) MutedTeal else LightBronze
+                color = if (isSelected) colors.primary else colors.onSecondary
             )
         }
 
@@ -211,7 +208,7 @@ private fun CurrencyRow(
         // Nombre de la divisa
         Text(
             text = currency.name,
-            color = TextWhite,
+            color = colors.onSurface,
             fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
@@ -222,13 +219,13 @@ private fun CurrencyRow(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(MutedTeal),
+                    .background(colors.primary),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Seleccionada",
-                    tint = DarkCoffee,
+                    tint = colors.onPrimary,
                     modifier = Modifier.size(16.dp)
                 )
             }

@@ -6,7 +6,7 @@ FinanceZ es una aplicación móvil Android nativa diseñada para personas que de
 ### Pilares Fundamentales
 - **Filosofía Local-First:** 100% manual y privada. Todo se almacena localmente en SQLite mediante Room. Sin nube, sin backend remoto, sin telemetría ni lectura de SMS/notificaciones.
 - **Trazabilidad vs Presupuestos:** Registro exacto de flujos y distribución de activos/pasivos sin límites artificiales.
-- **Estética:** Neobanco minimalista (Dark Coffee `#412722`, Muted Teal `#86ba90`, Scarlet Rush `#df2935`, Light Bronze `#dfa06e`, Lemon Chiffon `#f5f3bb`).
+- **Estética:** Neobanco minimalista (Dark Khaki `#3D3522` / `#4A442D`, Hunter Green `#386150`, Ocean Mist `#58B09C`, Frosted Mint `#CAF7E2`).
 
 ## 2. Decisiones Caras y Alcance
 - **Multi-tenant / Roles:** Monousuario local, sin autenticación ni perfiles.
@@ -26,4 +26,5 @@ FinanceZ es una aplicación móvil Android nativa diseñada para personas que de
 - Mantener la arquitectura pragmática: persistencia consolidada en `app/src/main/kotlin/com/personal/financez/data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
 - Valores monetarios almacenados en tipos enteros (`Long` en centavos) para evitar errores de precisión de punto flotante.
 - Documentos de diseño en `docs/` mantenidos concisos (< 100 líneas).
+- Sistema de diseño y UI: Las pantallas y componentes composables nunca deben importar constantes de color directas; consumen exclusivamente tokens semánticos vía `MaterialTheme.colorScheme`.
 - Compilación verificable con `.\gradlew.bat assembleDebug`.

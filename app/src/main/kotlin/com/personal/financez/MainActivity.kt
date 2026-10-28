@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -18,10 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.personal.financez.ui.onboarding.CurrencySelectionScreen
 import com.personal.financez.ui.onboarding.OnboardingUiState
 import com.personal.financez.ui.onboarding.OnboardingViewModel
-import com.personal.financez.ui.theme.BackgroundDark
 import com.personal.financez.ui.theme.FinanceZTheme
-import com.personal.financez.ui.theme.MutedTeal
-import com.personal.financez.ui.theme.TextWhite
 
 class MainActivity : ComponentActivity() {
 
@@ -32,7 +30,7 @@ class MainActivity : ComponentActivity() {
             FinanceZTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = BackgroundDark
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     val app = application as FinanceZApplication
                     val viewModel: OnboardingViewModel = viewModel(
@@ -52,7 +50,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(color = MutedTeal)
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                             }
                         }
 
@@ -73,7 +71,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Text(
                                     text = "Moneda base configurada con éxito",
-                                    color = TextWhite
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }
