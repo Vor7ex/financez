@@ -923,7 +923,11 @@ fun CurrencyCatalogSheet(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "${filteredCurrencies.size} divisas disponibles",
+                        text = if (filteredCurrencies.size == 1) {
+                            "1 divisa disponible"
+                        } else {
+                            "${filteredCurrencies.size} divisas disponibles"
+                        },
                         style = typography.bodyMedium,
                         color = colors.onSurfaceVariant
                     )
