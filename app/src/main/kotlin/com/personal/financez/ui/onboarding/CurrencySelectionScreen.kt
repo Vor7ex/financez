@@ -1,7 +1,9 @@
 package com.personal.financez.ui.onboarding
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,6 +17,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,24 +59,42 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.financez.data.currencies.Currency
 import com.personal.financez.data.currencies.CurrencyLoader
 import com.personal.financez.data.currencies.getFlagForCurrency
+import com.personal.financez.ui.theme.CreatoDisplay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +105,68 @@ fun CurrencySelectionScreen(
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val pullOffset = remember { Animatable(0f) }
+    val maxPullDistance = 90.dp
+    val density = LocalDensity.current
+    val maxPullPx = with(density) { maxPullDistance.toPx() }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Si el usuario desliza hacia arriba mientras está en overscroll, colapsamos el pullOffset
+                if (available.y < 0 && pullOffset.value > 0f) {
+                    val delta = available.y
+                    val newOffset = (pullOffset.value + delta).coerceAtLeast(0f)
+                    val consumed = newOffset - pullOffset.value
+                    coroutineScope.launch {
+                        pullOffset.snapTo(newOffset)
+                    }
+                    return Offset(0f, consumed)
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                // Cuando está en el tope superior y el usuario desliza hacia abajo (como pull-to-refresh)
+                if (available.y > 0 && scrollState.value == 0) {
+                    val friction = (1f - (pullOffset.value / (maxPullPx * 1.8f))).coerceIn(0.25f, 0.55f)
+                    val newOffset = (pullOffset.value + available.y * friction).coerceAtMost(maxPullPx)
+                    coroutineScope.launch {
+                        pullOffset.snapTo(newOffset)
+                    }
+                    return Offset(0f, available.y)
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                if (pullOffset.value > 0f) {
+                    pullOffset.animateTo(
+                        targetValue = 0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    )
+                }
+                return Velocity.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (pullOffset.value > 0f) {
+                    pullOffset.animateTo(
+                        targetValue = 0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    )
+                }
+                return Velocity.Zero
+            }
+        }
+    }
 
     var selectedCode by rememberSaveable { mutableStateOf(initialCurrency) }
     var selectedName by rememberSaveable {
@@ -111,19 +195,63 @@ fun CurrencySelectionScreen(
             )
         }
     ) { innerPadding ->
+        val pullProgress = (pullOffset.value / maxPullPx).coerceIn(0f, 1f)
+        val pullHeightDp = with(density) { pullOffset.value.toDp() }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .nestedScroll(nestedScrollConnection)
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        do {
+                            val event = awaitPointerEvent()
+                        } while (event.changes.any { it.pressed })
+                        if (pullOffset.value > 0f) {
+                            coroutineScope.launch {
+                                pullOffset.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessMediumLow
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
                 .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 1. Cabecera editorial limpia (sin "PASO 01")
-            BrandHeader()
+            // Revelación lúdica de FINANCEZ al deslizar hacia abajo desde el tope
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(pullHeightDp)
+                    .graphicsLayer {
+                        alpha = pullProgress
+                        scaleX = 0.65f + 0.35f * pullProgress
+                        scaleY = 0.65f + 0.35f * pullProgress
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                if (pullOffset.value > 4f) {
+                    FinanceZLogo(
+                        baseFontSize = 18.sp,
+                        accentFontSize = 24.sp
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
+
+            // 1. Cabecera editorial limpia centrada (sin "PASO 01")
+            BrandHeader()
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             // 2. Tarjeta Hero con la divisa actualmente seleccionada (sin metadatos técnicos)
             SelectedCurrencyCard(currency = selectedCurrency)
@@ -166,43 +294,72 @@ fun CurrencySelectionScreen(
 }
 
 /**
- * Cabecera editorial con la marca y el mensaje de bienvenida.
+ * Logotipo oficial de FinanceZ con acento tipográfico en las últimas dos letras "EZ",
+ * sin el punto verde a la izquierda.
+ */
+@Composable
+fun FinanceZLogo(
+    modifier: Modifier = Modifier,
+    baseFontSize: TextUnit = 18.sp,
+    accentFontSize: TextUnit = 24.sp
+) {
+    val colors = MaterialTheme.colorScheme
+
+    Text(
+        modifier = modifier,
+        text = buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    fontFamily = CreatoDisplay,
+                    fontWeight = FontWeight.Black,
+                    fontSize = baseFontSize,
+                    letterSpacing = 2.sp,
+                    color = colors.onBackground
+                )
+            ) {
+                append("FINANC")
+            }
+            withStyle(
+                SpanStyle(
+                    fontFamily = CreatoDisplay,
+                    fontWeight = FontWeight.Black,
+                    fontSize = accentFontSize,
+                    letterSpacing = 2.sp,
+                    color = colors.primary
+                )
+            ) {
+                append("EZ")
+            }
+        }
+    )
+}
+
+/**
+ * Cabecera editorial con el mensaje de bienvenida centrado.
  */
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(colors.primary)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "FINANCEZ",
-                style = typography.labelLarge,
-                color = colors.onBackground
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = "Bienvenido",
             style = typography.headlineLarge,
-            color = colors.onBackground
+            color = colors.onBackground,
+            textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "Elige la moneda base de tus finanzas. Todas tus cuentas, métricas y balances se consolidarán en esta divisa.",
             style = typography.bodyLarge,
-            color = colors.onSurfaceVariant
+            color = colors.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -465,7 +622,7 @@ fun TactileCurrencyItem(
 
         Text(
             text = currency.name,
-            style = typography.bodyLarge,
+            style = typography.titleMedium,
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant,
             modifier = Modifier.weight(1f),
             maxLines = 1,

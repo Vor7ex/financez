@@ -41,67 +41,69 @@ val CreatoDisplay = FontFamily(
     Font(R.font.creato_display_black_italic, FontWeight.Black, FontStyle.Italic)
 )
 
-// Tipografía semántica de FinanceZ basada en Material 3 con escala visual amplia para Coolvetica
+// Tipografía semántica de FinanceZ basada en Material 3:
+// - Creato Display para Brand, Display, Headlines, Títulos y Labels
+// - Coolvetica para cuerpos de texto editoriales y descriptivos
 val FinanceZTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
         fontSize = 68.sp,
         lineHeight = 72.sp,
         letterSpacing = (-0.5).sp
     ),
     displayMedium = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
         fontSize = 52.sp,
         lineHeight = 58.sp,
         letterSpacing = (-0.25).sp
     ),
     displaySmall = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Normal,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
         fontSize = 42.sp,
         lineHeight = 48.sp,
         letterSpacing = 0.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 40.sp,
-        lineHeight = 46.sp,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
+        fontSize = 38.sp,
+        lineHeight = 44.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 38.sp,
         letterSpacing = 0.sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Medium,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 26.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 30.sp,
         letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Medium,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.15.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Medium,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp
