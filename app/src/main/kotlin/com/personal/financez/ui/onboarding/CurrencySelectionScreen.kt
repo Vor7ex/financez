@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
@@ -23,6 +24,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,10 +76,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -238,6 +246,31 @@ fun CurrencySelectionScreen(
         )
     }
 
+    // Sexta divisa si se selecciona una que no pertenece a las 5 iniciales
+    var extraCurrencyCode by rememberSaveable {
+        mutableStateOf(
+            if (CurrencyLoader.defaultCurrencies.none { it.code == initialCurrency }) initialCurrency else null
+        )
+    }
+    var extraCurrencyName by rememberSaveable {
+        mutableStateOf(
+            if (CurrencyLoader.defaultCurrencies.none { it.code == initialCurrency }) selectedName else null
+        )
+    }
+
+    val quickSelectionCurrencies = remember(extraCurrencyCode, extraCurrencyName) {
+        val baseList = CurrencyLoader.defaultCurrencies
+        if (extraCurrencyCode != null && extraCurrencyName != null && baseList.none { it.code == extraCurrencyCode }) {
+            baseList + Currency(
+                code = extraCurrencyCode!!,
+                name = extraCurrencyName!!,
+                flagEmoji = getFlagForCurrency(extraCurrencyCode!!)
+            )
+        } else {
+            baseList
+        }
+    }
+
     var showFullCatalogSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -321,18 +354,23 @@ fun CurrencySelectionScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // 3. Selección rápida de monedas frecuentes (sin inscripción "ISO 4217")
+                // 3. Selección rápida de monedas frecuentes
                 QuickSelectionSection(
+                    currencies = quickSelectionCurrencies,
                     selectedCode = selectedCurrency.code,
                     onSelectCurrency = { currency ->
                         selectedCode = currency.code
                         selectedName = currency.name
+                        if (CurrencyLoader.defaultCurrencies.none { it.code == currency.code }) {
+                            extraCurrencyCode = currency.code
+                            extraCurrencyName = currency.name
+                        }
                     }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 4. Barra de búsqueda reordenada DESPUÉS de selección rápida (sin "catálogo")
+                // 4. Botón de exploración del catálogo completo
                 SearchTriggerField(
                     onClick = { showFullCatalogSheet = true }
                 )
@@ -350,6 +388,10 @@ fun CurrencySelectionScreen(
             onSelectCurrency = { currency ->
                 selectedCode = currency.code
                 selectedName = currency.name
+                if (CurrencyLoader.defaultCurrencies.none { it.code == currency.code }) {
+                    extraCurrencyCode = currency.code
+                    extraCurrencyName = currency.name
+                }
                 showFullCatalogSheet = false
             },
             sheetState = sheetState
@@ -504,13 +546,6 @@ fun SelectedCurrencyCard(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            HorizontalDivider(
-                color = colors.outline.copy(alpha = 0.15f),
-                thickness = 0.5.dp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -533,44 +568,33 @@ fun SelectedCurrencyCard(
 }
 
 /**
- * Sección de selección rápida con las 5 divisas más frecuentes.
+ * Sección de selección rápida con divisas frecuentes y la 6ta seleccionada si aplica.
  */
 @Composable
 fun QuickSelectionSection(
+    currencies: List<Currency>,
     selectedCode: String,
     onSelectCurrency: (Currency) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        currencies.forEach { currency ->
+            val isSelected = currency.code == selectedCode
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "SELECCIÓN RÁPIDA",
-            style = typography.labelSmall,
-            color = colors.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            CurrencyLoader.defaultCurrencies.forEach { currency ->
-                val isSelected = currency.code == selectedCode
-
-                TactileCurrencyItem(
-                    currency = currency,
-                    isSelected = isSelected,
-                    onSelect = { onSelectCurrency(currency) }
-                )
-            }
+            TactileCurrencyItem(
+                currency = currency,
+                isSelected = isSelected,
+                onSelect = { onSelectCurrency(currency) }
+            )
         }
     }
 }
 
 /**
- * Barra disparadora de búsqueda ubicada después de la selección rápida.
+ * Botón para abrir el catálogo completo de divisas.
  */
 @Composable
 fun SearchTriggerField(
@@ -579,37 +603,63 @@ fun SearchTriggerField(
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isInteracting = isPressed || isHovered
 
-    Row(
+    val scale by animateFloatAsState(
+        targetValue = if (isInteracting) 0.98f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "searchBtnScale"
+    )
+
+    Surface(
+        onClick = onClick,
+        interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(colors.surface)
-            .border(1.dp, colors.outline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        shape = RoundedCornerShape(14.dp),
+        color = colors.surface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isInteracting) colors.outline.copy(alpha = 0.45f) else colors.outline.copy(alpha = 0.25f)
+        )
     ) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = null,
-            tint = colors.primary,
-            modifier = Modifier.size(22.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = colors.primary,
+                modifier = Modifier.size(20.dp)
+            )
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-        Text(
-            text = "Buscar entre más de 50 divisas...",
-            style = typography.bodyLarge,
-            color = colors.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
-        )
+            Text(
+                text = "Buscar otra divisa",
+                style = typography.labelLarge,
+                color = colors.onSurface
+            )
+        }
     }
 }
 
 /**
- * Item táctil individual para listas de divisas.
+ * Item táctil individual para listas de divisas con micro-interacción de pulsación previa (hover/press).
  */
 @Composable
 fun TactileCurrencyItem(
@@ -621,15 +671,33 @@ fun TactileCurrencyItem(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isInteracting = isPressed || isHovered
+
+    val itemScale by animateFloatAsState(
+        targetValue = if (isInteracting) 0.98f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "itemScale"
+    )
+
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) colors.primary.copy(alpha = 0.08f) else colors.surface,
-        animationSpec = tween(200),
+        animationSpec = tween(150),
         label = "itemBg"
     )
 
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) colors.primary else colors.outline.copy(alpha = 0.18f),
-        animationSpec = tween(200),
+        targetValue = when {
+            isSelected -> colors.primary
+            isInteracting -> colors.outline.copy(alpha = 0.40f)
+            else -> colors.outline.copy(alpha = 0.18f)
+        },
+        animationSpec = tween(150),
         label = "itemBorder"
     )
 
@@ -648,11 +716,15 @@ fun TactileCurrencyItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = itemScale
+                scaleY = itemScale
+            }
             .clip(RoundedCornerShape(14.dp))
             .background(containerColor)
             .border(borderWidth, borderColor, RoundedCornerShape(14.dp))
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
                 onClick = onSelect
             )
@@ -735,32 +807,61 @@ fun CurrencyCatalogSheet(
     val typography = MaterialTheme.typography
     val allCurrencies = remember { CurrencyLoader.loadAllCurrencies(context) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchFocused by remember { mutableStateOf(false) }
 
     val filteredCurrencies = remember(searchQuery, allCurrencies) {
         allCurrencies.filter { it.matchesQuery(searchQuery) }
     }
 
+    val sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.background,
+        shape = sheetShape,
+        containerColor = colors.surface,
         tonalElevation = 0.dp,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 14.dp, bottom = 10.dp)
-                    .size(width = 40.dp, height = 4.dp)
-                    .clip(CircleShape)
-                    .background(colors.outline.copy(alpha = 0.4f))
-            )
-        }
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.90f)
+                .drawWithContent {
+                    drawContent()
+                    val strokeWidth = 1.dp.toPx()
+                    val halfStroke = strokeWidth / 2f
+                    val cornerRadius = 24.dp.toPx()
+                    val highlightColor = colors.outline.copy(alpha = 0.5f)
+                    val path = Path().apply {
+                        moveTo(halfStroke, cornerRadius)
+                        arcTo(
+                            rect = Rect(halfStroke, halfStroke, cornerRadius * 2 - halfStroke, cornerRadius * 2 - halfStroke),
+                            startAngleDegrees = 180f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false
+                        )
+                        lineTo(size.width - cornerRadius, halfStroke)
+                        arcTo(
+                            rect = Rect(size.width - cornerRadius * 2 + halfStroke, halfStroke, size.width - halfStroke, cornerRadius * 2 - halfStroke),
+                            startAngleDegrees = 270f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false
+                        )
+                    }
+                    drawPath(path, color = highlightColor, style = Stroke(width = strokeWidth))
+                }
                 .padding(horizontal = 20.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 12.dp, bottom = 12.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(colors.outline.copy(alpha = 0.5f))
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -772,6 +873,7 @@ fun CurrencyCatalogSheet(
                         style = typography.headlineMedium,
                         color = colors.onBackground
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "${filteredCurrencies.size} divisas disponibles",
                         style = typography.bodyMedium,
@@ -784,7 +886,7 @@ fun CurrencyCatalogSheet(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(colors.surface)
+                        .background(colors.background)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -800,20 +902,30 @@ fun CurrencyCatalogSheet(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = typography.bodyLarge.copy(color = colors.onSurface),
-                placeholder = {
-                    Text(
-                        text = "Buscar por moneda o código (ej. CLP)...",
-                        style = typography.bodyLarge,
-                        color = colors.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { isSearchFocused = it.isFocused },
+                textStyle = typography.bodyLarge.copy(
+                    fontFamily = CreatoDisplay,
+                    fontWeight = FontWeight.Normal,
+                    color = colors.onSurface
+                ),
+                placeholder = if (!isSearchFocused && searchQuery.isEmpty()) {
+                    {
+                        Text(
+                            text = "Buscar por moneda o código...",
+                            fontFamily = CreatoDisplay,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 15.sp,
+                            color = colors.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                } else null,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Buscar",
-                        tint = colors.primary,
+                        tint = if (isSearchFocused) colors.primary else colors.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -834,8 +946,8 @@ fun CurrencyCatalogSheet(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = colors.onSurface,
                     unfocusedTextColor = colors.onSurface,
-                    focusedContainerColor = colors.surface,
-                    unfocusedContainerColor = colors.surface,
+                    focusedContainerColor = colors.background,
+                    unfocusedContainerColor = colors.background,
                     focusedBorderColor = colors.primary,
                     unfocusedBorderColor = colors.outline.copy(alpha = 0.25f),
                     cursorColor = colors.primary
