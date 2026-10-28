@@ -456,7 +456,7 @@ fun TactileCurrencyItem(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = currency.code,
-                style = typography.titleMedium,
+                style = typography.labelMedium,
                 color = if (isSelected) colors.primary else colors.onSurface
             )
         }
@@ -493,66 +493,6 @@ fun TactileCurrencyItem(
                     modifier = Modifier.size(16.dp)
                 )
             }
-        }
-    }
-}
-
-/**
- * Fila de visualización dentro del catálogo modal.
- */
-@Composable
-fun CatalogCurrencyRow(
-    currency: Currency,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) colors.primary.copy(alpha = 0.10f) else colors.surface)
-            .border(
-                width = if (isSelected) 1.dp else 0.5.dp,
-                color = if (isSelected) colors.primary.copy(alpha = 0.5f) else colors.outline.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = currency.flagEmoji,
-            fontSize = 24.sp
-        )
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Text(
-            text = currency.name,
-            style = typography.titleMedium,
-            color = colors.onSurface,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(if (isSelected) colors.primary else colors.background)
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-        ) {
-            Text(
-                text = currency.code,
-                style = typography.labelMedium,
-                color = if (isSelected) colors.onPrimary else colors.onSurfaceVariant
-            )
         }
     }
 }
@@ -707,15 +647,15 @@ fun CurrencyCatalogSheet(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(filteredCurrencies, key = { it.code }) { currency ->
                         val isSelected = currency.code == selectedCurrencyCode
 
-                        CatalogCurrencyRow(
+                        TactileCurrencyItem(
                             currency = currency,
                             isSelected = isSelected,
-                            onClick = { onSelectCurrency(currency) }
+                            onSelect = { onSelectCurrency(currency) }
                         )
                     }
                 }

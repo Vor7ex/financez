@@ -135,17 +135,17 @@ val FinanceZTypography = Typography(
         letterSpacing = 1.5.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = CoolveticaHeavy,
-        fontWeight = FontWeight.Black,
-        fontSize = 15.sp,
-        lineHeight = 20.sp,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 18.sp,
         letterSpacing = 1.2.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Medium,
-        fontSize = 13.sp,
-        lineHeight = 18.sp,
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 1.4.sp
     )
 )
