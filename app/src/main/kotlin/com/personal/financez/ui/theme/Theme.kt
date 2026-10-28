@@ -23,6 +23,7 @@ fun FinanceZTheme(
 ) {
     MaterialTheme(
         colorScheme = FinanceZColorScheme,
+        typography = FinanceZTypography,
         content = content
     )
 }
