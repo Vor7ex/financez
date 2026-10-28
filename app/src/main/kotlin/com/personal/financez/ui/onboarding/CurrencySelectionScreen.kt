@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -128,7 +129,9 @@ fun CurrencySelectionScreen(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // Cuando está en el tope superior y el usuario desliza hacia abajo (como pull-to-refresh)
+                // Solo reaccionar a arrastre directo del usuario (ignorar inercia/flings para evitar que se quede pegado)
+                if (source != NestedScrollSource.UserInput) return Offset.Zero
+
                 if (available.y > 0 && scrollState.value == 0) {
                     val friction = (1f - (pullOffset.value / (maxPullPx * 1.8f))).coerceIn(0.25f, 0.55f)
                     val newOffset = (pullOffset.value + available.y * friction).coerceAtMost(maxPullPx)
@@ -144,10 +147,7 @@ fun CurrencySelectionScreen(
                 if (pullOffset.value > 0f) {
                     pullOffset.animateTo(
                         targetValue = 0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        )
+                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                     )
                 }
                 return Velocity.Zero
@@ -157,10 +157,7 @@ fun CurrencySelectionScreen(
                 if (pullOffset.value > 0f) {
                     pullOffset.animateTo(
                         targetValue = 0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        )
+                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                     )
                 }
                 return Velocity.Zero
@@ -213,10 +210,7 @@ fun CurrencySelectionScreen(
                             coroutineScope.launch {
                                 pullOffset.animateTo(
                                     targetValue = 0f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
-                                    )
+                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                                 )
                             }
                         }
@@ -356,7 +350,7 @@ fun BrandHeader(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Elige la moneda base de tus finanzas. Todas tus cuentas, métricas y balances se consolidarán en esta divisa.",
+            text = "Elige tu moneda principal. Podrás agregar otras monedas secundarias más adelante.",
             style = typography.bodyLarge,
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -454,12 +448,13 @@ fun SelectedCurrencyCard(
             ) {
                 Text(
                     text = "Formato de balance",
-                    style = typography.bodyMedium,
+                    style = typography.labelSmall,
                     color = colors.onSurfaceVariant
                 )
                 Text(
                     text = "${currency.code} 1,250,000.00",
-                    style = typography.titleSmall,
+                    style = typography.labelMedium,
+                    maxLines = 1,
                     color = colors.onSurface
                 )
             }
