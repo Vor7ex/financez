@@ -2,9 +2,11 @@ package com.personal.financez.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta oficial de marca (uso exclusivo interno en Theme.kt para mapeo semántico)
-val DarkKhakiDeep = Color(0xFF3D3522)
-val DarkKhakiMedium = Color(0xFF4A442D)
-val HunterGreen = Color(0xFF386150)
-val OceanMist = Color(0xFF58B09C)
-val FrostedMint = Color(0xFFCAF7E2)
+// Paleta oficial de marca FinanceZ
+val ObsidianForest = Color(0xFF121714)
+val DeepKhakiShadow = Color(0xFF1C231F)
+val DarkHunter = Color(0xFF2A3E34)
+val VibrantMint = Color(0xFF42DE9D)
+val DeepOnyxText = Color(0xFF0A1610)
+val FrostedIceMint = Color(0xFFECFDF5)
+val MutedSage = Color(0xFF96B3A5)
