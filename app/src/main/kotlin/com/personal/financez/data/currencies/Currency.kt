@@ -60,7 +60,8 @@ object CurrencyLoader {
                 val item = jsonArray.getJSONObject(i)
                 val code = item.getString("code")
                 val name = item.getString("name")
-                result.add(Currency(code = code, name = name))
+                val flag = item.optString("flag").ifBlank { getFlagForCurrency(code) }
+                result.add(Currency(code = code, name = name, flagEmoji = flag))
             }
             cachedCurrencies = result
             result
