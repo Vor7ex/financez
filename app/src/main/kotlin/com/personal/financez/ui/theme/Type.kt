@@ -23,6 +23,24 @@ val CoolveticaHeavy = FontFamily(
     Font(R.font.coolvetica_hv_comp, FontWeight.Black)
 )
 
+// Familia secundaria oficial: Creato Display
+val CreatoDisplay = FontFamily(
+    Font(R.font.creato_display_thin, FontWeight.Thin),
+    Font(R.font.creato_display_thin_italic, FontWeight.Thin, FontStyle.Italic),
+    Font(R.font.creato_display_light, FontWeight.Light),
+    Font(R.font.creato_display_light_italic, FontWeight.Light, FontStyle.Italic),
+    Font(R.font.creato_display_regular, FontWeight.Normal),
+    Font(R.font.creato_display_regular_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.creato_display_medium, FontWeight.Medium),
+    Font(R.font.creato_display_medium_italic, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.creato_display_bold, FontWeight.Bold),
+    Font(R.font.creato_display_bold_italic, FontWeight.Bold, FontStyle.Italic),
+    Font(R.font.creato_display_extra_bold, FontWeight.ExtraBold),
+    Font(R.font.creato_display_extra_bold_italic, FontWeight.ExtraBold, FontStyle.Italic),
+    Font(R.font.creato_display_black, FontWeight.Black),
+    Font(R.font.creato_display_black_italic, FontWeight.Black, FontStyle.Italic)
+)
+
 // Tipografía semántica de FinanceZ basada en Material 3 con escala visual amplia para Coolvetica
 val FinanceZTypography = Typography(
     displayLarge = TextStyle(
@@ -110,11 +128,11 @@ val FinanceZTypography = Typography(
         letterSpacing = 0.4.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = CoolveticaHeavy,
-        fontWeight = FontWeight.Black,
-        fontSize = 50.sp,
-        lineHeight = 50.sp,
-        letterSpacing = 5.2.sp
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 1.5.sp
     ),
     labelMedium = TextStyle(
         fontFamily = CoolveticaHeavy,
