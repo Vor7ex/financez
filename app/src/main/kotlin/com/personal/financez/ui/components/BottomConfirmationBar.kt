@@ -44,10 +44,7 @@ fun ConfirmButton(
     ) {
         Text(
             text = text,
-            style = typography.labelLarge.copy(
-                fontSize = 16.sp,
-                letterSpacing = 1.5.sp
-            )
+            style = typography.labelLarge
         )
     }
 }

@@ -9,21 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.personal.financez.R
 
-// Familia de marca oficial: Coolvetica
-val Coolvetica = FontFamily(
-    Font(R.font.coolvetica_rg, FontWeight.Normal),
-    Font(R.font.coolvetica_rg_it, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.coolvetica_rg_cond, FontWeight.Medium),
-    Font(R.font.coolvetica_rg_cram, FontWeight.SemiBold),
-    Font(R.font.coolvetica_hv_comp, FontWeight.Black)
-)
-
-// Acceso directo a Coolvetica Heavy Compressed para botones y logotipos de máximo impacto
-val CoolveticaHeavy = FontFamily(
-    Font(R.font.coolvetica_hv_comp, FontWeight.Black)
-)
-
-// Familia secundaria oficial: Creato Display
+// Familia tipográfica oficial de FinanceZ: Creato Display
 val CreatoDisplay = FontFamily(
     Font(R.font.creato_display_thin, FontWeight.Thin),
     Font(R.font.creato_display_thin_italic, FontWeight.Thin, FontStyle.Italic),
@@ -41,113 +27,124 @@ val CreatoDisplay = FontFamily(
     Font(R.font.creato_display_black_italic, FontWeight.Black, FontStyle.Italic)
 )
 
-// Tipografía semántica de FinanceZ basada en Material 3:
-// - Creato Display para Brand, Display, Headlines, Títulos y Labels
-// - Coolvetica para cuerpos de texto editoriales y descriptivos
+/**
+ * Escala tipográfica semántica de FinanceZ basada en Material 3.
+ * Unificada 100% en Creato Display para garantizar coherencia visual,
+ * sobriedad de neobanco y máxima legibilidad en interfaces financieras.
+ */
 val FinanceZTypography = Typography(
+    // 1. DISPLAY — Grandes balances patrimoniales y códigos ISO principales
     displayLarge = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 68.sp,
-        lineHeight = 72.sp,
+        fontSize = 56.sp,
+        lineHeight = 62.sp,
         letterSpacing = (-0.5).sp
     ),
     displayMedium = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 52.sp,
-        lineHeight = 58.sp,
+        fontSize = 48.sp,
+        lineHeight = 54.sp,
         letterSpacing = (-0.25).sp
     ),
     displaySmall = TextStyle(
         fontFamily = CreatoDisplay,
-        fontWeight = FontWeight.Bold,
-        fontSize = 42.sp,
-        lineHeight = 48.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 38.sp,
+        lineHeight = 44.sp,
         letterSpacing = 0.sp
     ),
+
+    // 2. HEADLINE — Títulos de pantalla, cabeceras editoriales y modales
     headlineLarge = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 38.sp,
-        lineHeight = 44.sp,
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 26.sp,
-        lineHeight = 32.sp,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
+
+    // 3. TITLE — Nombres de cuentas, divisas y encabezados de listas
     titleLarge = TextStyle(
-        fontFamily = CreatoDisplay,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
-        letterSpacing = 0.sp
-    ),
-    titleMedium = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        lineHeight = 22.sp,
         letterSpacing = 0.15.sp
     ),
     titleSmall = TextStyle(
         fontFamily = CreatoDisplay,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
+
+    // 4. BODY — Cuerpos de texto, explicaciones, inputs de búsqueda y subtítulos
     bodyLarge = TextStyle(
-        fontFamily = Coolvetica,
+        fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.25.sp
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.15.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = Coolvetica,
-        fontWeight = FontWeight.Normal,
-        fontSize = 17.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.25.sp
-    ),
-    bodySmall = TextStyle(
-        fontFamily = Coolvetica,
+        fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
+        letterSpacing = 0.25.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = CreatoDisplay,
+        fontWeight = FontWeight.Light,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     ),
+
+    // 5. LABEL — Botones de acción, badges, pastillas monetarias y metadatos
     labelLarge = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
-        lineHeight = 22.sp,
+        fontSize = 20.sp,
+        lineHeight = 20.sp,
         letterSpacing = 1.5.sp
     ),
     labelMedium = TextStyle(
         fontFamily = CreatoDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
+        fontSize = 16.sp,
         lineHeight = 18.sp,
-        letterSpacing = 1.2.sp
+        letterSpacing = 1.0.sp
     ),
     labelSmall = TextStyle(
         fontFamily = CreatoDisplay,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 1.4.sp
+        letterSpacing = 0.5.sp
     )
 )

@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.financez.data.currencies.Currency
 import com.personal.financez.data.currencies.CurrencyLoader
-import com.personal.financez.ui.theme.CreatoDisplay
 
 /**
  * Modal BottomSheet para explorar y filtrar el catálogo completo de divisas.
@@ -170,17 +169,13 @@ fun CurrencyCatalogSheet(
                     .fillMaxWidth()
                     .onFocusChanged { isSearchFocused = it.isFocused },
                 textStyle = typography.bodyLarge.copy(
-                    fontFamily = CreatoDisplay,
-                    fontWeight = FontWeight.Normal,
                     color = colors.onSurface
                 ),
                 placeholder = if (!isSearchFocused && searchQuery.isEmpty()) {
                     {
                         Text(
                             text = "Buscar por moneda o código...",
-                            fontFamily = CreatoDisplay,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 15.sp,
+                            style = typography.bodyLarge,
                             color = colors.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
