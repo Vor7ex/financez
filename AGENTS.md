@@ -26,5 +26,9 @@ FinanceZ es una aplicación móvil Android nativa diseñada para personas que de
 - Mantener la arquitectura pragmática: persistencia consolidada en `app/src/main/kotlin/com/personal/financez/data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
 - Valores monetarios almacenados en tipos enteros (`Long` en centavos) para evitar errores de precisión de punto flotante.
 - Documentos de diseño en `docs/` mantenidos concisos (< 100 líneas).
-- Sistema de diseño y UI: Las pantallas y componentes composables nunca deben importar constantes de color directas; consumen exclusivamente tokens semánticos vía `MaterialTheme.colorScheme`.
+- Sistema de diseño y UI:
+  - Las pantallas y componentes composables nunca deben importar constantes de color directas; consumen exclusivamente tokens semánticos vía `MaterialTheme.colorScheme`.
+  - Cohesión tipográfica estricta: Consumir exclusivamente la escala semántica oficial vía `MaterialTheme.typography`. No utilizar fuentes alternativas ni sobreescribir `fontFamily` directamente en componentes.
+  - Modularidad y mantenibilidad: Toda pantalla debe descomponerse en componentes pequeños y reutilizables en subpaquetes `components/`.
+  - Coherencia visual: Toda nueva pantalla debe adherirse rigurosamente al lenguaje visual de la app (curvaturas, micro-interacciones táctiles, paddings simétricos y sobriedad minimalista).
 - Compilación verificable con `.\gradlew.bat assembleDebug`.
