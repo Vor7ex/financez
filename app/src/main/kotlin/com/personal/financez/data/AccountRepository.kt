@@ -9,6 +9,7 @@ import com.personal.financez.data.local.InstitutionDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 
@@ -16,6 +17,7 @@ interface AccountRepository {
     fun observeInstitutions(): Flow<List<FinancialInstitutionEntity>>
     suspend fun seedInstitutionsIfEmpty()
     fun observeAccounts(): Flow<List<AccountEntity>>
+    fun observeConsolidatedNetWorth(): Flow<Long>
     suspend fun getAccountById(id: String): AccountEntity?
     suspend fun createAccount(account: AccountEntity)
 }
@@ -54,6 +56,12 @@ class DefaultAccountRepository(
 
     override fun observeAccounts(): Flow<List<AccountEntity>> {
         return accountDao.observeAll()
+    }
+
+    override fun observeConsolidatedNetWorth(): Flow<Long> {
+        return accountDao.observeAll().map { accounts ->
+            accounts.sumOf { it.balance }
+        }
     }
 
     override suspend fun getAccountById(id: String): AccountEntity? {

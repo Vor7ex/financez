@@ -118,6 +118,34 @@ class AccountRepositoryTest {
 
         repository.createAccount(invalidBankAccount)
     }
+
+    @Test
+    fun calculate_consolidated_net_worth_sums_all_account_balances() = runTest {
+        val repository = DefaultAccountRepository(
+            institutionDao = FakeInstitutionDao(),
+            accountDao = FakeAccountDao()
+        )
+
+        val acc1 = AccountEntity(
+            id = "acc-1",
+            name = "Bancolombia",
+            type = AccountType.CUENTA_BANCARIA,
+            institutionId = "bancolombia",
+            balance = 1_500_000_00L
+        )
+        val acc2 = AccountEntity(
+            id = "acc-2",
+            name = "Efectivo",
+            type = AccountType.EFECTIVO,
+            balance = 250_000_00L
+        )
+
+        repository.createAccount(acc1)
+        repository.createAccount(acc2)
+
+        val total = repository.observeConsolidatedNetWorth().first()
+        assertEquals(1_750_000_00L, total)
+    }
 }
 
 class FakeInstitutionDao : InstitutionDao {
