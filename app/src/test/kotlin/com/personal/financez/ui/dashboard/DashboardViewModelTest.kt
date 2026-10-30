@@ -3,11 +3,13 @@ package com.personal.financez.ui.dashboard
 import com.personal.financez.data.AccountRepository
 import com.personal.financez.data.local.AccountEntity
 import com.personal.financez.data.local.FinancialInstitutionEntity
+import com.personal.financez.data.local.AccountType
 import com.personal.financez.ui.onboarding.FakeUserPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -47,6 +49,28 @@ class DashboardViewModelTest {
         assertTrue("Con 0 cuentas debe mostrar el estado Empty", state is DashboardUiState.Empty)
         assertEquals("COP", (state as DashboardUiState.Empty).baseCurrency)
     }
+
+    @Test
+    fun dashboard_state_exposes_accounts_and_net_worth_when_accounts_exist() = runTest {
+        val initialAccounts = listOf(
+            AccountEntity(id = "1", name = "Bancolombia", type = AccountType.CUENTA_BANCARIA, institutionId = "bancolombia", balance = 2_000_000_00L),
+            AccountEntity(id = "2", name = "Efectivo", type = AccountType.EFECTIVO, balance = 500_000_00L)
+        )
+        val fakeAccountRepo = FakeAccountRepository(initialAccounts = initialAccounts)
+        val fakePrefsRepo = FakeUserPreferencesRepository(initialCurrency = "COP")
+
+        val viewModel = DashboardViewModel(
+            accountRepository = fakeAccountRepo,
+            preferencesRepository = fakePrefsRepo
+        )
+
+        val state = viewModel.uiState.value
+        assertTrue("Cuando hay cuentas debe mostrar Success", state is DashboardUiState.Success)
+        val successState = state as DashboardUiState.Success
+        assertEquals(2, successState.accounts.size)
+        assertEquals(2_500_000_00L, successState.consolidatedNetWorth)
+        assertEquals("COP", successState.baseCurrency)
+    }
 }
 
 class FakeAccountRepository(
@@ -62,7 +86,7 @@ class FakeAccountRepository(
     override fun observeAccounts(): Flow<List<AccountEntity>> = accountsFlow
 
     override fun observeConsolidatedNetWorth(): Flow<Long> {
-        return MutableStateFlow(accountsFlow.value.sumOf { it.balance })
+        return accountsFlow.map { accounts -> accounts.sumOf { it.balance } }
     }
 
     override suspend fun getAccountById(id: String): AccountEntity? {
