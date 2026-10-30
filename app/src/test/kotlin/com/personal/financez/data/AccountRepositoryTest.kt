@@ -4,12 +4,14 @@ import com.personal.financez.data.local.AccountDao
 import com.personal.financez.data.local.AccountEntity
 import com.personal.financez.data.local.FinancialInstitutionEntity
 import com.personal.financez.data.local.InstitutionDao
+import com.personal.financez.data.local.AccountType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -40,6 +42,37 @@ class AccountRepositoryTest {
         assertEquals(5, institutions.size)
         val names = institutions.map { it.name }.toSet()
         assertTrue(names.containsAll(listOf("Bancolombia", "Nu", "Davivienda", "Nequi", "Lulo Bank")))
+    }
+
+    @Test
+    fun create_bank_account_persists_institution_balance_and_financial_attributes() = runTest {
+        val repository = DefaultAccountRepository(
+            institutionDao = FakeInstitutionDao(),
+            accountDao = FakeAccountDao()
+        )
+
+        val account = AccountEntity(
+            id = "acc-bank-1",
+            name = "Ahorros Nu",
+            type = AccountType.CUENTA_BANCARIA,
+            institutionId = "nu",
+            balance = 1_500_000_00L,
+            currency = "COP",
+            isGmfExempt = true,
+            annualEffectiveRate = 13.0
+        )
+
+        repository.createAccount(account)
+
+        val stored = repository.getAccountById("acc-bank-1")
+        assertNotNull(stored)
+        assertEquals("Ahorros Nu", stored?.name)
+        assertEquals(AccountType.CUENTA_BANCARIA, stored?.type)
+        assertEquals("nu", stored?.institutionId)
+        assertEquals(1_500_000_00L, stored?.balance)
+        assertEquals("COP", stored?.currency)
+        assertEquals(true, stored?.isGmfExempt)
+        assertEquals(13.0, stored?.annualEffectiveRate)
     }
 }
 

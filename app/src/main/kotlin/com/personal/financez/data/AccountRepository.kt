@@ -15,6 +15,7 @@ interface AccountRepository {
     fun observeInstitutions(): Flow<List<FinancialInstitutionEntity>>
     suspend fun seedInstitutionsIfEmpty()
     fun observeAccounts(): Flow<List<AccountEntity>>
+    suspend fun getAccountById(id: String): AccountEntity?
     suspend fun createAccount(account: AccountEntity)
 }
 
@@ -52,6 +53,10 @@ class DefaultAccountRepository(
 
     override fun observeAccounts(): Flow<List<AccountEntity>> {
         return accountDao.observeAll()
+    }
+
+    override suspend fun getAccountById(id: String): AccountEntity? {
+        return accountDao.getById(id)
     }
 
     override suspend fun createAccount(account: AccountEntity) {
