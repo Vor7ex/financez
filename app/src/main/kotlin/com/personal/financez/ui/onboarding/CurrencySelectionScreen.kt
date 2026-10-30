@@ -711,27 +711,15 @@ fun TactileCurrencyItem(
         label = "itemScale"
     )
 
-    val containerColor by animateColorAsState(
-        targetValue = if (isSelected) colors.primary.copy(alpha = 0.08f) else colors.surface,
-        animationSpec = tween(150),
-        label = "itemBg"
-    )
+    val containerColor = if (isSelected) colors.primary.copy(alpha = 0.08f) else colors.surface
 
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isSelected -> colors.primary
-            isInteracting -> colors.outline.copy(alpha = 0.40f)
-            else -> colors.outline.copy(alpha = 0.18f)
-        },
-        animationSpec = tween(150),
-        label = "itemBorder"
-    )
+    val borderColor = when {
+        isSelected -> colors.primary
+        isInteracting -> colors.outline.copy(alpha = 0.40f)
+        else -> colors.outline.copy(alpha = 0.18f)
+    }
 
-    val borderWidth by animateDpAsState(
-        targetValue = if (isSelected) 1.5.dp else 1.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "itemBorderWidth"
-    )
+    val borderWidth = if (isSelected) 1.5.dp else 1.dp
 
     val checkScale by animateFloatAsState(
         targetValue = if (isSelected) 1f else 0.85f,
