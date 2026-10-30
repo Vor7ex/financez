@@ -1051,7 +1051,7 @@ fun CurrencyCatalogSheet(
 }
 
 /**
- * Botón estático y reutilizable de confirmación con acabado metálico cepillado resaltado.
+ * Botón estático y reutilizable de confirmación con color sólido institucional.
  */
 @Composable
 fun ConfirmButton(
@@ -1061,43 +1061,14 @@ fun ConfirmButton(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    // Gradiente metálico pronunciado con destellos y sombras derivados de tokens semánticos
-    val brightHighlight = lerp(colors.primary, colors.onSecondary, 0.42f)
-    val softHighlight = lerp(colors.primary, colors.onSecondary, 0.20f)
-    val base = colors.primary
-    val shadow = lerp(colors.primary, colors.secondary, 0.30f)
-    val deepShadow = lerp(colors.primary, colors.secondary, 0.45f)
-
-    val metallicBrush = Brush.linearGradient(
-        0.0f to brightHighlight,
-        0.22f to softHighlight,
-        0.45f to deepShadow,
-        0.68f to base,
-        0.84f to brightHighlight,
-        1.0f to shadow,
-        start = Offset(0f, 0f),
-        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-    )
-
-    val metallicBorderBrush = Brush.linearGradient(
-        0.0f to brightHighlight.copy(alpha = 0.75f),
-        0.50f to deepShadow.copy(alpha = 0.35f),
-        1.0f to brightHighlight.copy(alpha = 0.75f),
-        start = Offset(0f, 0f),
-        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-    )
-
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(metallicBrush)
-            .border(1.dp, metallicBorderBrush, RoundedCornerShape(14.dp)),
+            .height(64.dp),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
+            containerColor = colors.primary,
             contentColor = colors.onPrimary
         ),
         contentPadding = PaddingValues(0.dp)
