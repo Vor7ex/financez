@@ -5,8 +5,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
-import com.personal.financez.data.AccountRepository
-import com.personal.financez.data.DefaultAccountRepository
 import com.personal.financez.data.local.FinanceZDatabase
 import com.personal.financez.data.preferences.DataStoreUserPreferencesRepository
 import com.personal.financez.data.preferences.UserPreferencesRepository
@@ -16,14 +14,14 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 /**
  * Contenedor central de infraestructura e inyección de dependencias.
- * Expone la persistencia base y los repositorios núcleo para que cada
- * feature construya sus propias dependencias localmente sin acoplar este contenedor.
+ * Expone exclusivamente la persistencia y servicios base esenciales (Room Database, DataStore Preferences, Context).
+ * Las features construyen sus propios repositorios localmente a partir de esta infraestructura,
+ * garantizando el cumplimiento estricto del principio Abierto/Cerrado (OCP).
  */
 interface AppContainer {
     val context: Context
     val database: FinanceZDatabase
     val preferencesRepository: UserPreferencesRepository
-    val accountRepository: AccountRepository
 }
 
 class DefaultAppContainer(override val context: Context) : AppContainer {
@@ -38,13 +36,5 @@ class DefaultAppContainer(override val context: Context) : AppContainer {
             FinanceZDatabase::class.java,
             FinanceZDatabase.DATABASE_NAME
         ).build()
-    }
-
-    override val accountRepository: AccountRepository by lazy {
-        DefaultAccountRepository(
-            institutionDao = database.institutionDao(),
-            accountDao = database.accountDao(),
-            context = context
-        )
     }
 }
