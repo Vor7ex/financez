@@ -71,6 +71,31 @@ class DashboardViewModelTest {
         assertEquals(2_500_000_00L, successState.consolidatedNetWorth)
         assertEquals("COP", successState.baseCurrency)
     }
+
+    @Test
+    fun switching_dashboard_tab_toggles_between_net_worth_and_accounts() = runTest {
+        val initialAccounts = listOf(
+            AccountEntity(id = "1", name = "Bancolombia", type = AccountType.CUENTA_BANCARIA, institutionId = "bancolombia", balance = 2_000_000_00L)
+        )
+        val fakeAccountRepo = FakeAccountRepository(initialAccounts = initialAccounts)
+        val fakePrefsRepo = FakeUserPreferencesRepository(initialCurrency = "COP")
+
+        val viewModel = DashboardViewModel(
+            accountRepository = fakeAccountRepo,
+            preferencesRepository = fakePrefsRepo
+        )
+
+        val initialState = viewModel.uiState.value as DashboardUiState.Success
+        assertEquals(DashboardTab.PATRIMONIO, initialState.selectedTab)
+
+        viewModel.selectTab(DashboardTab.CUENTAS)
+        val accountsTabState = viewModel.uiState.value as DashboardUiState.Success
+        assertEquals(DashboardTab.CUENTAS, accountsTabState.selectedTab)
+
+        viewModel.selectTab(DashboardTab.PATRIMONIO)
+        val netWorthTabState = viewModel.uiState.value as DashboardUiState.Success
+        assertEquals(DashboardTab.PATRIMONIO, netWorthTabState.selectedTab)
+    }
 }
 
 class FakeAccountRepository(
