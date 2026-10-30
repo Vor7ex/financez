@@ -3,6 +3,7 @@ package com.personal.financez.data
 import android.content.Context
 import com.personal.financez.data.local.AccountDao
 import com.personal.financez.data.local.AccountEntity
+import com.personal.financez.data.local.AccountType
 import com.personal.financez.data.local.FinancialInstitutionEntity
 import com.personal.financez.data.local.InstitutionDao
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,11 @@ class DefaultAccountRepository(
     }
 
     override suspend fun createAccount(account: AccountEntity) {
+        if (account.type == AccountType.CUENTA_BANCARIA) {
+            require(!account.institutionId.isNullOrBlank()) {
+                "Una cuenta bancaria requiere una institución financiera"
+            }
+        }
         accountDao.insert(account)
     }
 }

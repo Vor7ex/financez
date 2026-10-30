@@ -74,6 +74,50 @@ class AccountRepositoryTest {
         assertEquals(true, stored?.isGmfExempt)
         assertEquals(13.0, stored?.annualEffectiveRate)
     }
+
+    @Test
+    fun create_cash_account_persists_without_requiring_institution() = runTest {
+        val repository = DefaultAccountRepository(
+            institutionDao = FakeInstitutionDao(),
+            accountDao = FakeAccountDao()
+        )
+
+        val account = AccountEntity(
+            id = "acc-cash-1",
+            name = "Billetera Efectivo",
+            type = AccountType.EFECTIVO,
+            institutionId = null,
+            balance = 250_000_00L,
+            currency = "COP"
+        )
+
+        repository.createAccount(account)
+
+        val stored = repository.getAccountById("acc-cash-1")
+        assertNotNull(stored)
+        assertEquals("Billetera Efectivo", stored?.name)
+        assertEquals(AccountType.EFECTIVO, stored?.type)
+        assertEquals(null, stored?.institutionId)
+        assertEquals(250_000_00L, stored?.balance)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun create_bank_account_without_institution_throws_illegal_argument_exception() = runTest {
+        val repository = DefaultAccountRepository(
+            institutionDao = FakeInstitutionDao(),
+            accountDao = FakeAccountDao()
+        )
+
+        val invalidBankAccount = AccountEntity(
+            id = "acc-bank-invalid",
+            name = "Cuenta Sin Banco",
+            type = AccountType.CUENTA_BANCARIA,
+            institutionId = null,
+            balance = 100_000_00L
+        )
+
+        repository.createAccount(invalidBankAccount)
+    }
 }
 
 class FakeInstitutionDao : InstitutionDao {
