@@ -72,7 +72,9 @@ data class AccountEntity(
     val balance: Long = 0L,
     val currency: String = "COP",
     @ColumnInfo(name = "is_gmf_exempt")
-    val isGmfExempt: Boolean = false
+    val isGmfExempt: Boolean = false,
+    @ColumnInfo(name = "annual_effective_rate")
+    val annualEffectiveRate: Double? = null
 )
 
 @Entity(
