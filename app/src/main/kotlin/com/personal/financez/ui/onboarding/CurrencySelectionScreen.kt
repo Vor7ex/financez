@@ -299,7 +299,7 @@ fun CurrencySelectionScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(top = innerPadding.calculateTopPadding())
                     .nestedScroll(nestedScrollConnection)
                     .pointerInput(Unit) {
                         awaitEachGesture {
@@ -382,7 +382,7 @@ fun CurrencySelectionScreen(
                     onClick = { showFullCatalogSheet = true }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
             }
         }
     }
@@ -1051,7 +1051,7 @@ fun CurrencyCatalogSheet(
 }
 
 /**
- * Botón estático y reutilizable de confirmación con acabado metálico cepillado tenue.
+ * Botón estático y reutilizable de confirmación con acabado metálico cepillado resaltado.
  */
 @Composable
 fun ConfirmButton(
@@ -1061,16 +1061,28 @@ fun ConfirmButton(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    // Gradiente metálico muy sutil derivado de tokens semánticos (micro-brillo FrostedIceMint y sombra DarkHunter)
-    val highlight = lerp(colors.primary, colors.onSecondary, 0.10f)
+    // Gradiente metálico pronunciado con destellos y sombras derivados de tokens semánticos
+    val brightHighlight = lerp(colors.primary, colors.onSecondary, 0.42f)
+    val softHighlight = lerp(colors.primary, colors.onSecondary, 0.20f)
     val base = colors.primary
-    val shadow = lerp(colors.primary, colors.secondary, 0.08f)
+    val shadow = lerp(colors.primary, colors.secondary, 0.30f)
+    val deepShadow = lerp(colors.primary, colors.secondary, 0.45f)
 
     val metallicBrush = Brush.linearGradient(
-        0.0f to highlight,
-        0.35f to base,
-        0.65f to shadow,
-        1.0f to highlight,
+        0.0f to brightHighlight,
+        0.22f to softHighlight,
+        0.45f to deepShadow,
+        0.68f to base,
+        0.84f to brightHighlight,
+        1.0f to shadow,
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+    )
+
+    val metallicBorderBrush = Brush.linearGradient(
+        0.0f to brightHighlight.copy(alpha = 0.75f),
+        0.50f to deepShadow.copy(alpha = 0.35f),
+        1.0f to brightHighlight.copy(alpha = 0.75f),
         start = Offset(0f, 0f),
         end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
     )
@@ -1079,9 +1091,10 @@ fun ConfirmButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(64.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(metallicBrush),
+            .background(metallicBrush)
+            .border(1.dp, metallicBorderBrush, RoundedCornerShape(14.dp)),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
@@ -1091,13 +1104,16 @@ fun ConfirmButton(
     ) {
         Text(
             text = "CONFIRMAR",
-            style = typography.labelLarge
+            style = typography.labelLarge.copy(
+                fontSize = 16.sp,
+                letterSpacing = 1.5.sp
+            )
         )
     }
 }
 
 /**
- * Barra de navegación inferior que contiene el ConfirmButton reutilizable.
+ * Barra de navegación inferior con línea divisoria sólida que aloja el ConfirmButton.
  */
 @Composable
 fun BottomConfirmationBar(
@@ -1106,27 +1122,23 @@ fun BottomConfirmationBar(
 ) {
     val colors = MaterialTheme.colorScheme
 
-    Surface(
-        color = colors.background,
-        modifier = modifier.fillMaxWidth()
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(colors.background)
     ) {
+        HorizontalDivider(
+            color = colors.outline.copy(alpha = 0.35f),
+            thickness = 1.dp
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 14.dp)
         ) {
-            HorizontalDivider(
-                color = colors.outline.copy(alpha = 0.15f),
-                thickness = 0.5.dp
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 14.dp)
-            ) {
-                ConfirmButton(onClick = onConfirm)
-            }
+            ConfirmButton(onClick = onConfirm)
         }
     }
 }
