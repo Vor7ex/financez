@@ -61,7 +61,7 @@ fun Modifier.tactileScale(
  */
 fun Modifier.tactilePress(
     targetScale: Float = 0.96f,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ): Modifier = tactileScale(targetScale = targetScale, onClick = onClick)
 
 /**
@@ -69,5 +69,5 @@ fun Modifier.tactilePress(
  */
 fun Modifier.tactileBounce(
     targetScale: Float = 1.10f,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ): Modifier = tactileScale(targetScale = targetScale, onClick = onClick)

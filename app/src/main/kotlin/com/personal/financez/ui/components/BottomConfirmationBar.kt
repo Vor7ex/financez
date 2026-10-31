@@ -1,25 +1,25 @@
 package com.personal.financez.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Botón estático y reutilizable de confirmación con color sólido institucional.
+ * Botón estático y reutilizable de confirmación con color sólido institucional y micro-interacción táctil.
  */
 @Composable
 fun ConfirmButton(
@@ -30,21 +30,19 @@ fun ConfirmButton(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    Button(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colors.primary,
-            contentColor = colors.onPrimary
-        ),
-        contentPadding = PaddingValues(0.dp)
+            .height(64.dp)
+            .tactilePress(targetScale = 0.97f, onClick = onClick)
+            .clip(RoundedCornerShape(14.dp))
+            .background(colors.primary),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            style = typography.labelLarge
+            style = typography.labelLarge,
+            color = colors.onPrimary
         )
     }
 }
