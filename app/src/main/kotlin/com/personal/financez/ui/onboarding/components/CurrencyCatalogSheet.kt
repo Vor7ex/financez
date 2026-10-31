@@ -121,43 +121,24 @@ fun CurrencyCatalogSheet(
                     .background(colors.outline.copy(alpha = 0.5f))
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column {
-                    Text(
-                        text = "Seleccionar divisa",
-                        style = typography.headlineMedium,
-                        color = colors.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = if (filteredCurrencies.size == 1) {
-                            "1 divisa disponible"
-                        } else {
-                            "${filteredCurrencies.size} divisas disponibles"
-                        },
-                        style = typography.bodyMedium,
-                        color = colors.onSurfaceVariant
-                    )
-                }
-
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(colors.background)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Cerrar",
-                        tint = colors.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                Text(
+                    text = "Seleccionar divisa",
+                    style = typography.headlineMedium,
+                    color = colors.onBackground
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = if (filteredCurrencies.size == 1) {
+                        "1 divisa disponible"
+                    } else {
+                        "${filteredCurrencies.size} divisas disponibles"
+                    },
+                    style = typography.bodyMedium,
+                    color = colors.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
