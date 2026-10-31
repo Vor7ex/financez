@@ -1,13 +1,5 @@
 package com.personal.financez.ui.dashboard.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -24,8 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,15 +27,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.personal.financez.ui.components.tactilePress
 
 /**
  * Tarjeta de botón para "Nueva cuenta" que se posiciona en el primer espacio de la cuadrícula.
- * Posee un borde con línea punteada, sin relleno sólido (color de fondo) y animación táctil
- * elástica idéntica a los botones de selección de divisas de la app.
+ * Posee un borde con línea punteada, sin relleno sólido y efecto de hundimiento táctil en pulsación
+ * manteniendo un color constante y sobrio.
  */
 @Composable
 fun NewAccountPlaceholderCard(
@@ -55,50 +45,20 @@ fun NewAccountPlaceholderCard(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val isInteracting = isPressed || isHovered
-
-    // Animación de rebote físico táctil idéntica a TactileCurrencyItem
-    val cardScale by animateFloatAsState(
-        targetValue = if (isInteracting) 0.95f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "newAccountCardScale"
-    )
-
-    val animatedContentColor by animateColorAsState(
-        targetValue = if (isInteracting) colors.primary else colors.onSurfaceVariant,
-        label = "newAccountColorAnim"
-    )
-
-    val animatedBorderColor by animateColorAsState(
-        targetValue = if (isInteracting) colors.primary else colors.outline.copy(alpha = 0.45f),
-        label = "newAccountBorderColorAnim"
-    )
-
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(115.dp)
-            .graphicsLayer {
-                scaleX = cardScale
-                scaleY = cardScale
-            }
             .clip(RoundedCornerShape(14.dp))
             .dashedBorder(
                 strokeWidth = 1.5.dp,
-                color = animatedBorderColor,
+                color = colors.outline.copy(alpha = 0.45f),
                 cornerRadius = 14.dp,
                 dashLength = 7.dp,
                 gapLength = 6.dp
             )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
+            .tactilePress(
+                targetScale = 0.96f,
                 onClick = onClick
             )
             .padding(16.dp),
@@ -111,7 +71,7 @@ fun NewAccountPlaceholderCard(
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Agregar cuenta",
-                tint = animatedContentColor,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -120,7 +80,7 @@ fun NewAccountPlaceholderCard(
             Text(
                 text = "Nueva cuenta",
                 style = typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = animatedContentColor
+                color = colors.onSurfaceVariant
             )
         }
     }
