@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +32,7 @@ import com.personal.financez.di.AppContainer
 import com.personal.financez.ui.dashboard.components.DashboardTabSelector
 import com.personal.financez.ui.navigation.FeatureNavGraph
 import com.personal.financez.ui.navigation.NavRoutes
+import kotlinx.coroutines.launch
 
 class DashboardNavGraph : FeatureNavGraph {
 
@@ -82,8 +87,21 @@ private fun DashboardScreenHost(
             }
         }
 
-        is DashboardUiState.Empty -> {
-            var localSelectedTab by remember { mutableStateOf(DashboardTab.PATRIMONIO) }
+        is DashboardUiState.Empty, is DashboardUiState.Success -> {
+            val initialTab = if (state is DashboardUiState.Success) state.selectedTab else DashboardTab.PATRIMONIO
+            val pagerState = rememberPagerState(
+                initialPage = if (initialTab == DashboardTab.PATRIMONIO) 0 else 1
+            ) { 2 }
+            val coroutineScope = rememberCoroutineScope()
+
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.currentPage }.collect { page ->
+                    val tab = if (page == 0) DashboardTab.PATRIMONIO else DashboardTab.CUENTAS
+                    onSelectTab(tab)
+                }
+            }
+
+            val currentTab = if (pagerState.currentPage == 0) DashboardTab.PATRIMONIO else DashboardTab.CUENTAS
 
             Column(
                 modifier = modifier
@@ -93,31 +111,53 @@ private fun DashboardScreenHost(
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
                 DashboardTabSelector(
-                    selectedTab = localSelectedTab,
-                    onTabSelected = {
-                        localSelectedTab = it
-                        onSelectTab(it)
+                    selectedTab = currentTab,
+                    pagerState = pagerState,
+                    onTabSelected = { tab ->
+                        val targetPage = if (tab == DashboardTab.PATRIMONIO) 0 else 1
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(targetPage)
+                        }
+                        onSelectTab(tab)
                     }
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-        }
-
-        is DashboardUiState.Success -> {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .statusBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
-            ) {
-                DashboardTabSelector(
-                    selectedTab = state.selectedTab,
-                    onTabSelected = onSelectTab
-                )
-
                 Spacer(modifier = Modifier.height(24.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    when (page) {
+                        0 -> {
+                            // Ventana 1: Patrimonio
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Ventana Patrimonio",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        1 -> {
+                            // Ventana 2: Cuentas
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Ventana Cuentas",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
