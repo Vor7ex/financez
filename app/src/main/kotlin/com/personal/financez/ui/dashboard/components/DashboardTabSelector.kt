@@ -50,7 +50,7 @@ fun DashboardTabSelector(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(44.dp)
             .clip(CircleShape)
             .background(colors.surface)
             .pointerInput(selectedTab) {
@@ -63,7 +63,7 @@ fun DashboardTabSelector(
                     }
                 }
             }
-            .padding(4.dp)
+            .padding(3.dp)
     ) {
         val calculatedBias = if (pagerState != null) {
             val offset = pagerState.currentPage + pagerState.currentPageOffsetFraction

@@ -31,7 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.personal.financez.data.DefaultAccountRepository
 import com.personal.financez.di.AppContainer
-import com.personal.financez.ui.dashboard.components.DashboardTabSelector
+import com.personal.financez.ui.dashboard.components.DashboardTopBar
 import com.personal.financez.ui.dashboard.components.EmptyNetWorthMessage
 import com.personal.financez.ui.dashboard.components.NetWorthHeroCard
 import com.personal.financez.ui.dashboard.components.NewAccountPlaceholderCard
@@ -118,7 +118,7 @@ private fun DashboardScreenHost(
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                DashboardTabSelector(
+                DashboardTopBar(
                     selectedTab = currentTab,
                     pagerState = pagerState,
                     onTabSelected = { tab ->
@@ -127,6 +127,9 @@ private fun DashboardScreenHost(
                             pagerState.animateScrollToPage(targetPage)
                         }
                         onSelectTab(tab)
+                    },
+                    onSettingsClick = {
+                        // Navegación hacia Ajustes en historia posterior
                     }
                 )
 
