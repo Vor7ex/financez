@@ -1,34 +1,37 @@
 # Guía para Agentes — FinanceZ
 
 ## 1. Contexto del Producto
-FinanceZ es una aplicación móvil Android nativa diseñada para personas que desean trazabilidad financiera personal estricta (entradas reales, salidas efectivas y distribución patrimonial) sin presupuestos restrictivos.
+FinanceZ es una aplicación móvil Android nativa para trazabilidad financiera personal estricta sin presupuestos restrictivos.
 
 ### Pilares Fundamentales
-- **Filosofía Local-First:** 100% manual y privada. Todo se almacena localmente en SQLite mediante Room. Sin nube, sin backend remoto, sin telemetría ni lectura de SMS/notificaciones.
-- **Trazabilidad vs Presupuestos:** Registro exacto de flujos y distribución de activos/pasivos sin límites artificiales.
-- **Estética:** Neobanco minimalista (Dark Khaki `#3D3522` / `#4A442D`, Hunter Green `#386150`, Ocean Mist `#58B09C`, Frosted Mint `#CAF7E2`).
+- **Local-First:** 100% manual y privada en SQLite (Room). Sin red ni telemetría.
+- **Trazabilidad vs Presupuestos:** Registro exacto de flujos y distribución de activos/pasivos.
+- **Estética:** Neobanco minimalista (Dark Khaki, Hunter Green, Ocean Mist, Frosted Mint).
 
 ## 2. Decisiones Caras y Alcance
-- **Multi-tenant / Roles:** Monousuario local, sin autenticación ni perfiles.
-- **Offline / Sincronización:** 100% Offline estricto. Cero sincronización en red.
-- **Multimoneda:** Moneda base elegible en onboarding; cuentas secundarias con TRM manual registrada por movimiento.
-- **Idioma:** Monoidioma (Español).
+- **Multi-tenant / Roles:** Monousuario local, sin autenticación.
+- **Offline:** 100% Offline estricto.
+- **Multimoneda:** Moneda base en onboarding; secundarias con TRM manual.
+- **Idioma:** Español.
 
 ## 3. Stack Tecnológico
-- **Lenguaje & JDK:** Kotlin 2.0.21 con JDK 23 (Android SDK 35, minSdk 26).
-- **UI:** Jetpack Compose + Material 3 (Compose BOM 2024.10.01).
-- **Gestión de Estado:** `ViewModel` + `StateFlow<UiState>`.
-- **Persistencia:** Room 2.6.1 (SQLite local) con KSP 2.0.21-1.0.28, DataStore Preferences 1.1.1.
-- **Inyección de Dependencias:** Inyección manual mediante contenedor de aplicación (`AppContainer`).
-- **Construcción:** Gradle 8.11.1 mediante `.\gradlew.bat`.
+- Kotlin 2.0.21, JDK 23 (Android SDK 35, minSdk 26).
+- UI: Jetpack Compose + Material 3 (BOM 2024.10.01).
+- Estado: `ViewModel` + `StateFlow<UiState>`.
+- Persistencia: Room 2.6.1, DataStore Preferences 1.1.1.
+- DI: Inyección manual (`AppContainer`).
+- Build: Gradle 8.11.1 (`.\gradlew.bat`).
 
 ## 4. Convenciones de Desarrollo
-- Mantener la arquitectura pragmática: persistencia consolidada en `app/src/main/kotlin/com/personal/financez/data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
-- Valores monetarios almacenados en tipos enteros (`Long` en centavos) para evitar errores de precisión de punto flotante.
-- Documentos de diseño en `docs/` mantenidos concisos (< 100 líneas).
-- Sistema de diseño y UI:
-  - Las pantallas y componentes composables nunca deben importar constantes de color directas; consumen exclusivamente tokens semánticos vía `MaterialTheme.colorScheme`.
-  - Cohesión tipográfica estricta: Consumir exclusivamente la escala semántica oficial vía `MaterialTheme.typography`. No utilizar fuentes alternativas ni sobreescribir `fontFamily` directamente en componentes.
-  - Modularidad y mantenibilidad: Toda pantalla debe descomponerse en componentes pequeños y reutilizables en subpaquetes `components/`.
-  - Coherencia visual: Toda nueva pantalla debe adherirse rigurosamente al lenguaje visual de la app (curvaturas, micro-interacciones táctiles, paddings simétricos y sobriedad minimalista).
-- Compilación verificable con `.\gradlew.bat assembleDebug`.
+- Persistencia consolidada en `data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
+- Dinero en enteros (`Long` en centavos).
+- UI: Solo colores de `MaterialTheme.colorScheme` y tipografía de `MaterialTheme.typography` (Creato Display). Cero constantes directas.
+- Modularidad: Pantallas descompuestas en `components/`.
+
+## 5. Arquitectura de Features (OCP)
+- **`FinanceZApplication` cerrado:** Solo inicializa `AppContainer`.
+- **`AppContainer` inmutable:** Solo expone `context`, `database` y `preferencesRepository`. Las features construyen sus repositorios con los DAOs.
+- **`FeatureNavGraph`:** Cada feature orquesta y registra sus rutas en `NavGraphBuilder`.
+- **ViewModels:** DSL Compose `viewModel { ... }` (cero factories manuales con `as T`).
+- **`MainActivity` pasivo:** Host de ~20 líneas que solo monta `AppNavHost(app.container)`.
+- **`AppNavHost`:** Registro declarativo de features en una lista.
