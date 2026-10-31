@@ -1,6 +1,7 @@
 package com.personal.financez.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,11 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +32,9 @@ import androidx.navigation.compose.composable
 import com.personal.financez.data.DefaultAccountRepository
 import com.personal.financez.di.AppContainer
 import com.personal.financez.ui.dashboard.components.DashboardTabSelector
+import com.personal.financez.ui.dashboard.components.EmptyNetWorthMessage
+import com.personal.financez.ui.dashboard.components.NetWorthHeroCard
+import com.personal.financez.ui.dashboard.components.NewAccountPlaceholderCard
 import com.personal.financez.ui.navigation.FeatureNavGraph
 import com.personal.financez.ui.navigation.NavRoutes
 import kotlinx.coroutines.launch
@@ -89,6 +94,9 @@ private fun DashboardScreenHost(
 
         is DashboardUiState.Empty, is DashboardUiState.Success -> {
             val initialTab = if (state is DashboardUiState.Success) state.selectedTab else DashboardTab.PATRIMONIO
+            val baseCurrency = if (state is DashboardUiState.Success) state.baseCurrency else (state as DashboardUiState.Empty).baseCurrency
+            val netWorth = if (state is DashboardUiState.Success) state.consolidatedNetWorth else 0L
+
             val pagerState = rememberPagerState(
                 initialPage = if (initialTab == DashboardTab.PATRIMONIO) 0 else 1
             ) { 2 }
@@ -131,29 +139,41 @@ private fun DashboardScreenHost(
                     when (page) {
                         0 -> {
                             // Ventana 1: Patrimonio
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                            Column(
+                                modifier = Modifier.fillMaxSize()
                             ) {
-                                Text(
-                                    text = "Ventana Patrimonio",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                NetWorthHeroCard(
+                                    consolidatedNetWorth = netWorth,
+                                    baseCurrency = baseCurrency
                                 )
+
+                                if (netWorth == 0L) {
+                                    Spacer(modifier = Modifier.height(18.dp))
+
+                                    EmptyNetWorthMessage(
+                                        onNavigateToAccounts = {
+                                            coroutineScope.launch {
+                                                pagerState.animateScrollToPage(1)
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
 
                         1 -> {
-                            // Ventana 2: Cuentas
-                            Box(
+                            // Ventana 2: Cuentas (en cuadrícula)
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
-                                Text(
-                                    text = "Ventana Cuentas",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                item {
+                                    NewAccountPlaceholderCard(
+                                        onClick = onAddAccount
+                                    )
+                                }
                             }
                         }
                     }
