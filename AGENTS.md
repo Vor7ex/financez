@@ -23,8 +23,11 @@ FinanceZ es una aplicación móvil Android nativa para trazabilidad financiera p
 - Build: Gradle 8.11.1 (`.\gradlew.bat`).
 
 ## 4. Convenciones de Desarrollo
-- Persistencia consolidada en `data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
-- Dinero en enteros (`Long` en centavos).
+- Persistencia exclusiva en `data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
+- Catálogo estático de divisas en `core/currency/CurrencyCatalog.kt`.
+- Repositorios en `data/repository/`: median entre `data/local`/DataStore y los ViewModels.
+- Utilidades puras (texto, matemáticas, divisas) en `core/utils/`. Cero dependencias de UI.
+- Dinero en enteros (`Long` en centavos). Formato visual vía `Long.formatMoney()`.
 - UI: Solo colores de `MaterialTheme.colorScheme` y tipografía de `MaterialTheme.typography` (Creato Display). Cero constantes directas.
 - Modularidad: Pantallas descompuestas en `components/`.
 

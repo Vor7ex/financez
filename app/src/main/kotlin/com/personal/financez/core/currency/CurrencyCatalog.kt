@@ -1,4 +1,4 @@
-package com.personal.financez.data.local
+package com.personal.financez.core.currency
 
 import android.content.Context
 import com.personal.financez.core.utils.getFlagForCurrency

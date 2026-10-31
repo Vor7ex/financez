@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.personal.financez.data.local.Currency
+import com.personal.financez.core.currency.Currency
 
 /**
  * Sección de selección rápida con divisas frecuentes y la moneda secundaria seleccionada si aplica.

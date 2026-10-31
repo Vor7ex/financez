@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.financez.core.utils.getFlagForCurrency
-import com.personal.financez.data.local.Currency
-import com.personal.financez.data.local.CurrencyLoader
+import com.personal.financez.core.currency.Currency
+import com.personal.financez.core.currency.CurrencyLoader
 import com.personal.financez.ui.components.BottomConfirmationBar
 import com.personal.financez.ui.components.FinanceZLogo
 import com.personal.financez.ui.onboarding.components.BrandHeader

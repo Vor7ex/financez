@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.personal.financez.data.local.Currency
+import com.personal.financez.core.currency.Currency
 
 /**
  * Tarjeta Hero que destaca la moneda seleccionada de manera limpia y sin ruidos técnicos.
