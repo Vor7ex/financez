@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -20,7 +21,7 @@ import androidx.compose.ui.text.withStyle
 
 /**
  * Mensaje informativo cuando el patrimonio está en 0, con enlace interactivo subrayado
- * que resalta visualmente en hover/pulsación para desplazarse fluidamente a la pestaña de cuentas.
+ * que se resalta como un marcador verdoso sobre "agrega una cuenta" en hover/pulsación.
  */
 @Composable
 fun EmptyNetWorthMessage(
@@ -35,9 +36,9 @@ fun EmptyNetWorthMessage(
     val isPressed by interactionSource.collectIsPressedAsState()
     val isInteracting = isHovered || isPressed
 
-    val linkColor by animateColorAsState(
-        targetValue = if (isInteracting) colors.onBackground else colors.primary,
-        label = "linkHighlightColor"
+    val highlightBackground by animateColorAsState(
+        targetValue = if (isInteracting) colors.primary.copy(alpha = 0.22f) else Color.Transparent,
+        label = "markerHighlightColor"
     )
 
     val annotatedText = buildAnnotatedString {
@@ -46,8 +47,9 @@ fun EmptyNetWorthMessage(
         }
         withStyle(
             SpanStyle(
-                color = linkColor,
-                fontWeight = if (isInteracting) FontWeight.SemiBold else FontWeight.Normal,
+                color = colors.primary,
+                background = highlightBackground,
+                fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.Underline
             )
         ) {
