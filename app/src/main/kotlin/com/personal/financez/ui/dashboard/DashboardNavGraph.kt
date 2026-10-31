@@ -137,6 +137,7 @@ private fun DashboardScreenHost(
 
                 HorizontalPager(
                     state = pagerState,
+                    pageSpacing = 24.dp,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     when (page) {

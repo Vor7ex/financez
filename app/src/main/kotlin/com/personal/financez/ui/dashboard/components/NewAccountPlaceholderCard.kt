@@ -49,17 +49,16 @@ fun NewAccountPlaceholderCard(
         modifier = modifier
             .fillMaxWidth()
             .height(115.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .tactilePress(
+                targetScale = 0.95f,
+                onClick = onClick
+            )
             .dashedBorder(
                 strokeWidth = 1.5.dp,
                 color = colors.outline.copy(alpha = 0.45f),
                 cornerRadius = 14.dp,
                 dashLength = 7.dp,
                 gapLength = 6.dp
-            )
-            .tactilePress(
-                targetScale = 0.96f,
-                onClick = onClick
             )
             .padding(16.dp),
         contentAlignment = Alignment.Center

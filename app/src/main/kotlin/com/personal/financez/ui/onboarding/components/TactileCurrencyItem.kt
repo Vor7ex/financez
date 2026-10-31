@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.financez.core.currency.Currency
+import com.personal.financez.ui.components.tactilePress
 
 /**
  * Item táctil individual para listas de divisas con micro-interacción de pulsación previa (hover/press).
@@ -58,28 +59,8 @@ fun TactileCurrencyItem(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val isInteracting = isPressed || isHovered
-
-    val itemScale by animateFloatAsState(
-        targetValue = if (isInteracting) 0.98f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "itemScale"
-    )
-
     val containerColor = if (isSelected) colors.primary.copy(alpha = 0.08f) else colors.surface
-
-    val borderColor = when {
-        isSelected -> colors.primary
-        isInteracting -> colors.outline.copy(alpha = 0.40f)
-        else -> colors.outline.copy(alpha = 0.18f)
-    }
-
+    val borderColor = if (isSelected) colors.primary else colors.outline.copy(alpha = 0.18f)
     val borderWidth = if (isSelected) 1.5.dp else 1.dp
 
     val checkScale by animateFloatAsState(
@@ -92,36 +73,10 @@ fun TactileCurrencyItem(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp)
-            .graphicsLayer {
-                scaleX = itemScale
-                scaleY = itemScale
-            }
+            .tactilePress(targetScale = 0.98f, onClick = onSelect)
             .clip(RoundedCornerShape(14.dp))
             .background(containerColor)
             .border(borderWidth, borderColor, RoundedCornerShape(14.dp))
-            .semantics {
-                role = Role.Button
-                onClick {
-                    onSelect()
-                    true
-                }
-            }
-            .pointerInput(onSelect) {
-                detectTapGestures(
-                    onPress = { offset ->
-                        val press = PressInteraction.Press(offset)
-                        interactionSource.emit(press)
-                        if (tryAwaitRelease()) {
-                            interactionSource.emit(PressInteraction.Release(press))
-                        } else {
-                            interactionSource.emit(PressInteraction.Cancel(press))
-                        }
-                    },
-                    onTap = {
-                        onSelect()
-                    }
-                )
-            }
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
