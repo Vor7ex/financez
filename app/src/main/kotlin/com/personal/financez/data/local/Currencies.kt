@@ -1,8 +1,9 @@
-package com.personal.financez.data.currencies
+package com.personal.financez.data.local
 
 import android.content.Context
+import com.personal.financez.core.utils.getFlagForCurrency
+import com.personal.financez.core.utils.unaccent
 import org.json.JSONArray
-import java.text.Normalizer
 
 /**
  * Modelo inmutable para representar una divisa con su código, nombre y bandera emoji.
@@ -25,7 +26,7 @@ data class Currency(
 }
 
 /**
- * Catálogo y cargador de divisas.
+ * Catálogo y cargador diferido de divisas desde assets/currencies.json.
  */
 object CurrencyLoader {
 
@@ -69,40 +70,4 @@ object CurrencyLoader {
             defaultCurrencies
         }
     }
-}
-
-/**
- * Mapeo automático de código ISO a bandera emoji usando caracteres de indicadores regionales Unicode.
- */
-fun getFlagForCurrency(code: String): String {
-    return when (code.uppercase()) {
-        "EUR" -> "🇪🇺"
-        "ANG" -> "🇨🇼"
-        "XCD" -> "🌴"
-        "XOF", "XAF" -> "🌍"
-        "BTC" -> "₿"
-        "XAU" -> "🪙"
-        else -> {
-            if (code.length >= 2) {
-                val country = code.substring(0, 2).uppercase()
-                countryCodeToEmoji(country)
-            } else "🌐"
-        }
-    }
-}
-
-private fun countryCodeToEmoji(countryCode: String): String {
-    if (countryCode.length != 2) return "🌐"
-    return try {
-        val first = Character.codePointAt(countryCode, 0) - 0x41 + 0x1F1E6
-        val second = Character.codePointAt(countryCode, 1) - 0x41 + 0x1F1E6
-        String(Character.toChars(first)) + String(Character.toChars(second))
-    } catch (e: Exception) {
-        "🌐"
-    }
-}
-
-private fun String.unaccent(): String {
-    val temp = Normalizer.normalize(this, Normalizer.Form.NFD)
-    return Regex("\\p{InCombiningDiacriticalMarks}+").replace(temp, "")
 }
