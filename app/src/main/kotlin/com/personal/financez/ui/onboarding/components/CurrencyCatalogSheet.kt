@@ -46,8 +46,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.personal.financez.core.currency.Currency
-import com.personal.financez.core.currency.CurrencyLoader
+import com.personal.financez.core.utils.Currency
+import com.personal.financez.core.utils.CurrencyLoader
 
 /**
  * Modal BottomSheet para explorar y filtrar el catálogo completo de divisas.

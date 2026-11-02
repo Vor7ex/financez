@@ -24,7 +24,7 @@ FinanceZ es una aplicación móvil Android nativa para trazabilidad financiera p
 
 ## 4. Convenciones de Desarrollo
 - Persistencia exclusiva en `data/local/` (`Entities.kt`, `Daos.kt`, `FinanceZDatabase.kt`).
-- Catálogo estático de divisas en `core/currency/CurrencyCatalog.kt`.
+- Catálogo estático de divisas en `core/utils/CurrencyCatalog.kt`.
 - Repositorios en `data/repository/`: median entre `data/local`/DataStore y los ViewModels.
 - Utilidades puras (texto, matemáticas, divisas) en `core/utils/`. Cero dependencias de UI.
 - Dinero en enteros (`Long` en centavos). Formato visual vía `Long.formatMoney()`.
