@@ -25,10 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import com.personal.financez.ui.components.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -143,24 +142,13 @@ fun CurrencyCatalogSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged { isSearchFocused = it.isFocused },
-                textStyle = typography.bodyLarge.copy(
-                    color = colors.onSurface
-                ),
-                placeholder = if (!isSearchFocused && searchQuery.isEmpty()) {
-                    {
-                        Text(
-                            text = "Buscar por moneda o código...",
-                            style = typography.bodyLarge,
-                            color = colors.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                } else null,
+                placeholderText = if (!isSearchFocused && searchQuery.isEmpty()) "Buscar por moneda o código..." else null,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -181,17 +169,7 @@ fun CurrencyCatalogSheet(
                         }
                     }
                 },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = colors.onSurface,
-                    unfocusedTextColor = colors.onSurface,
-                    focusedContainerColor = colors.background,
-                    unfocusedContainerColor = colors.background,
-                    focusedBorderColor = colors.primary,
-                    unfocusedBorderColor = colors.outline.copy(alpha = 0.25f),
-                    cursorColor = colors.primary
-                )
+                containerColor = colors.background
             )
 
             Spacer(modifier = Modifier.height(16.dp))
