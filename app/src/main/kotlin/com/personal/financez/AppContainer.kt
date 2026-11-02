@@ -1,4 +1,4 @@
-package com.personal.financez.di
+package com.personal.financez
 
 import android.content.Context
 import androidx.datastore.core.DataStore

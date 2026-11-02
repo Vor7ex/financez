@@ -2,7 +2,7 @@ package com.personal.financez.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import com.personal.financez.di.AppContainer
+import com.personal.financez.AppContainer
 
 /**
  * Contrato de orquestación de navegación para features independientes.

@@ -1,8 +1,6 @@
 package com.personal.financez
 
 import android.app.Application
-import com.personal.financez.di.AppContainer
-import com.personal.financez.di.DefaultAppContainer
 
 /**
  * Instancia de aplicación que vive durante todo el ciclo del proceso.
