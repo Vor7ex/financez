@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -20,13 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.personal.financez.ui.dashboard.DashboardTab
@@ -34,7 +33,7 @@ import com.personal.financez.ui.dashboard.DashboardTab
 /**
  * Selector de pestañas tipo cápsula (stadium) para alternar entre "Patrimonio" y "Cuentas".
  * Posee extremos completamente redondeados (circulares) con una píldora indicadora deslizante
- * que rodea con suavidad táctil la opción activa, con texto en negrilla y soporte para gestos de arrastre.
+ * que rodea con suavidad táctil la opción activa, con texto en negrilla.
  */
 @Composable
 fun DashboardTabSelector(
@@ -46,39 +45,34 @@ fun DashboardTabSelector(
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
-    // Contenedor exterior en forma de cápsula con extremos circulares y detector de deslizamiento
+    // Contenedor exterior en forma de cápsula con extremos circulares
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(44.dp)
             .clip(CircleShape)
             .background(colors.surface)
-            .pointerInput(selectedTab) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consume()
-                    if (dragAmount > 15f && selectedTab == DashboardTab.PATRIMONIO) {
-                        onTabSelected(DashboardTab.CUENTAS)
-                    } else if (dragAmount < -15f && selectedTab == DashboardTab.CUENTAS) {
-                        onTabSelected(DashboardTab.PATRIMONIO)
-                    }
-                }
-            }
             .padding(3.dp)
     ) {
-        val calculatedBias = if (pagerState != null) {
-            val offset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-            (offset * 2f - 1f).coerceIn(-1f, 1f)
-        } else {
-            val targetHorizontalBias = if (selectedTab == DashboardTab.PATRIMONIO) -1f else 1f
-            val animatedBias by animateFloatAsState(
-                targetValue = targetHorizontalBias,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessMediumLow
-                ),
-                label = "tab_selector_bias_anim"
-            )
-            animatedBias
+        val targetHorizontalBias = if (selectedTab == DashboardTab.PATRIMONIO) -1f else 1f
+        val animatedBias by animateFloatAsState(
+            targetValue = targetHorizontalBias,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "tab_selector_bias_anim"
+        )
+
+        val calculatedBias by remember(pagerState) {
+            derivedStateOf {
+                if (pagerState != null) {
+                    val rawOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    (rawOffset * 2f - 1f).coerceIn(-1f, 1f)
+                } else {
+                    animatedBias
+                }
+            }
         }
 
         // Subcomponente píldora que rodea la opción seleccionada actualmente

@@ -137,14 +137,15 @@ private fun DashboardScreenHost(
 
                 HorizontalPager(
                     state = pagerState,
-                    pageSpacing = 24.dp,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     when (page) {
                         0 -> {
                             // Ventana 1: Patrimonio
                             Column(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(end = 12.dp)
                             ) {
                                 NetWorthHeroCard(
                                     consolidatedNetWorth = netWorth,
@@ -169,7 +170,9 @@ private fun DashboardScreenHost(
                             // Ventana 2: Cuentas (en cuadrícula)
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(start = 12.dp),
                                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                                 verticalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
