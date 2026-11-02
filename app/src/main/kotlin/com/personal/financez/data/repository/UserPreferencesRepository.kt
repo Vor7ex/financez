@@ -1,4 +1,4 @@
-package com.personal.financez.data.preferences
+package com.personal.financez.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

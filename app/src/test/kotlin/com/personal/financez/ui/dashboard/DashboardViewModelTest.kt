@@ -1,6 +1,6 @@
 package com.personal.financez.ui.dashboard
 
-import com.personal.financez.data.AccountRepository
+import com.personal.financez.data.repository.AccountRepository
 import com.personal.financez.data.local.AccountEntity
 import com.personal.financez.data.local.FinancialInstitutionEntity
 import com.personal.financez.data.local.AccountType

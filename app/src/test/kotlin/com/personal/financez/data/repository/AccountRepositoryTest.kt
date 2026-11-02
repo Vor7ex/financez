@@ -1,4 +1,4 @@
-package com.personal.financez.data
+package com.personal.financez.data.repository
 
 import com.personal.financez.data.local.AccountDao
 import com.personal.financez.data.local.AccountEntity

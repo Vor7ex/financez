@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.personal.financez.data.local.FinanceZDatabase
-import com.personal.financez.data.preferences.DataStoreUserPreferencesRepository
-import com.personal.financez.data.preferences.UserPreferencesRepository
+import com.personal.financez.data.repository.DataStoreUserPreferencesRepository
+import com.personal.financez.data.repository.UserPreferencesRepository
 
 private const val PREFERENCES_NAME = "financez_preferences"
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCES_NAME)

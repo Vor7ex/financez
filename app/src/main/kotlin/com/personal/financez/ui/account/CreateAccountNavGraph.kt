@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.personal.financez.data.DefaultAccountRepository
+import com.personal.financez.data.repository.DefaultAccountRepository
 import com.personal.financez.di.AppContainer
 import com.personal.financez.ui.navigation.FeatureNavGraph
 import com.personal.financez.ui.navigation.NavRoutes

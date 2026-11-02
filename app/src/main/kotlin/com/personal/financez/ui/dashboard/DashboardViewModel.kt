@@ -2,9 +2,9 @@ package com.personal.financez.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.personal.financez.data.AccountRepository
+import com.personal.financez.data.repository.AccountRepository
 import com.personal.financez.data.local.AccountEntity
-import com.personal.financez.data.preferences.UserPreferencesRepository
+import com.personal.financez.data.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -2,11 +2,11 @@ package com.personal.financez.ui.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.personal.financez.data.AccountRepository
+import com.personal.financez.data.repository.AccountRepository
 import com.personal.financez.data.local.AccountEntity
 import com.personal.financez.data.local.AccountType
 import com.personal.financez.data.local.FinancialInstitutionEntity
-import com.personal.financez.data.preferences.UserPreferencesRepository
+import com.personal.financez.data.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

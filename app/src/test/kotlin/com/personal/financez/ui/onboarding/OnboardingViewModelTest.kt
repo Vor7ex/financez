@@ -1,6 +1,6 @@
 package com.personal.financez.ui.onboarding
 
-import com.personal.financez.data.preferences.UserPreferencesRepository
+import com.personal.financez.data.repository.UserPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
