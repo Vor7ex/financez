@@ -1,39 +1,17 @@
 package com.personal.financez.ui.dashboard.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.personal.financez.ui.components.PillSelector
 import com.personal.financez.ui.dashboard.DashboardTab
 
 /**
  * Selector de pestañas tipo cápsula (stadium) para alternar entre "Patrimonio" y "Cuentas".
- * Posee extremos completamente redondeados (circulares) con una píldora indicadora deslizante
- * que rodea con suavidad táctil la opción activa, con texto en negrilla.
+ * Construido sobre el componente reutilizable PillSelector.
  */
 @Composable
 fun DashboardTabSelector(
@@ -42,85 +20,32 @@ fun DashboardTabSelector(
     modifier: Modifier = Modifier,
     pagerState: PagerState? = null
 ) {
-    val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-
-    // Contenedor exterior en forma de cápsula con extremos circulares
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .clip(CircleShape)
-            .background(colors.surface)
-            .padding(3.dp)
-    ) {
-        val targetHorizontalBias = if (selectedTab == DashboardTab.PATRIMONIO) -1f else 1f
-        val animatedBias by animateFloatAsState(
-            targetValue = targetHorizontalBias,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMediumLow
-            ),
-            label = "tab_selector_bias_anim"
+    val tabs = remember {
+        listOf(
+            DashboardTab.PATRIMONIO to "Patrimonio",
+            DashboardTab.CUENTAS to "Cuentas"
         )
+    }
 
-        val calculatedBias by remember(pagerState) {
-            derivedStateOf {
-                if (pagerState != null) {
-                    val rawOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                    (rawOffset * 2f - 1f).coerceIn(-1f, 1f)
-                } else {
-                    animatedBias
-                }
-            }
-        }
+    val selectedIndex = if (selectedTab == DashboardTab.PATRIMONIO) 0 else 1
 
-        // Subcomponente píldora que rodea la opción seleccionada actualmente
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.5f)
-                .align(BiasAlignment(horizontalBias = calculatedBias, verticalBias = 0f))
-                .clip(CircleShape)
-                .background(colors.secondary)
-        )
-
-        // Pestañas interactivas de texto ("Patrimonio" y "Cuentas") con tipografía en negrilla
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val tabs = listOf(
-                DashboardTab.PATRIMONIO to "Patrimonio",
-                DashboardTab.CUENTAS to "Cuentas"
-            )
-
-            tabs.forEach { (tab, label) ->
-                val isSelected = selectedTab == tab
-                val animatedTextColor by animateColorAsState(
-                    targetValue = if (isSelected) colors.onSecondary else colors.onSurfaceVariant,
-                    label = "tab_text_color_anim"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(CircleShape)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            onTabSelected(tab)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = label,
-                        style = typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = animatedTextColor
-                    )
-                }
+    val overrideBias by remember(pagerState) {
+        derivedStateOf {
+            if (pagerState != null) {
+                val rawOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                (rawOffset * 2f - 1f).coerceIn(-1f, 1f)
+            } else {
+                null
             }
         }
     }
+
+    PillSelector(
+        items = tabs,
+        selectedIndex = selectedIndex,
+        onSelect = { (tab, _) -> onTabSelected(tab) },
+        labelProvider = { (_, label) -> label },
+        overrideHorizontalBias = overrideBias,
+        modifier = modifier
+    )
 }
