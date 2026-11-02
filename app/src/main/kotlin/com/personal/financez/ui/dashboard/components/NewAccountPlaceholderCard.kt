@@ -1,6 +1,7 @@
 package com.personal.financez.ui.dashboard.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,10 +50,9 @@ fun NewAccountPlaceholderCard(
         modifier = modifier
             .fillMaxWidth()
             .height(115.dp)
-            .tactilePress(
-                targetScale = 0.95f,
-                onClick = onClick
-            )
+            .tactilePress(targetScale = 0.95f)
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
             .dashedBorder(
                 strokeWidth = 1.5.dp,
                 color = colors.outline.copy(alpha = 0.45f),
