@@ -6,6 +6,7 @@ import com.personal.financez.ui.onboarding.FakeUserPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -122,9 +123,16 @@ class CreateAccountViewModelTest {
         viewModel.updateAnnualEffectiveRate("13.25%") // Rendimiento % E.A.
         viewModel.setGmfExempt(true) // Exención 4x1000 activada
 
+        var dismissEmitted = false
+        val dismissJob = launch(UnconfinedTestDispatcher()) {
+            viewModel.dismissEvent.collect { dismissEmitted = true }
+        }
+
         val success = viewModel.submit()
 
         assertTrue("Cuenta con todos los atributos opcionales debe crearse exitosamente", success)
+        assertTrue("Debe emitir el evento de cierre al guardar", dismissEmitted)
+        dismissJob.cancel()
         val accounts = fakeRepo.observeAccounts().first()
         assertEquals(1, accounts.size)
         val created = accounts.first()

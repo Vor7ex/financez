@@ -120,7 +120,7 @@ class CreateAccountViewModel(
         )
 
         accountRepository.createAccount(entity)
-        _dismissEvent.tryEmit(Unit)
+        _dismissEvent.emit(Unit)
         _uiState.update { it.copy(isSubmitting = false) }
         return true
     }
