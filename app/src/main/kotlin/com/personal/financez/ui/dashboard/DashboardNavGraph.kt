@@ -68,7 +68,7 @@ class DashboardNavGraph : FeatureNavGraph {
                 state = dashboardState,
                 onSelectTab = { dashboardViewModel.selectTab(it) },
                 onAddAccount = {
-                    // Manejo de apertura de creación de cuenta
+                    navController.navigate(NavRoutes.CREATE_ACCOUNT)
                 }
             )
         }

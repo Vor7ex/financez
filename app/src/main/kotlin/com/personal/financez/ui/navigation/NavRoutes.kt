@@ -6,4 +6,5 @@ package com.personal.financez.ui.navigation
 object NavRoutes {
     const val ONBOARDING = "onboarding"
     const val DASHBOARD = "dashboard"
+    const val CREATE_ACCOUNT = "create_account"
 }

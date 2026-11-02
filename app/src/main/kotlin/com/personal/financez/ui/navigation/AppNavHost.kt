@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.personal.financez.di.AppContainer
+import com.personal.financez.ui.account.CreateAccountNavGraph
 import com.personal.financez.ui.dashboard.DashboardNavGraph
 import com.personal.financez.ui.onboarding.OnboardingNavGraph
 import kotlinx.coroutines.flow.first
@@ -37,7 +38,8 @@ fun AppNavHost(
     featureNavGraphs: List<FeatureNavGraph> = remember {
         listOf(
             OnboardingNavGraph(),
-            DashboardNavGraph()
+            DashboardNavGraph(),
+            CreateAccountNavGraph()
         )
     }
 ) {
