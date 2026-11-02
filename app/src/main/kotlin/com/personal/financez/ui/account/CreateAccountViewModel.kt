@@ -98,11 +98,6 @@ class CreateAccountViewModel(
             hasError = true
         }
 
-        if (currentState.type == AccountType.CUENTA_BANCARIA && currentState.institutionId.isNullOrBlank()) {
-            _uiState.update { it.copy(institutionError = "Debes seleccionar una institución financiera") }
-            hasError = true
-        }
-
         if (hasError) return false
 
         _uiState.update { it.copy(isSubmitting = true) }

@@ -35,7 +35,7 @@ class CreateAccountViewModelTest {
     }
 
     @Test
-    fun submitting_bank_account_fails_validation_when_institution_is_missing() = runTest {
+    fun submitting_bank_account_succeeds_without_institution() = runTest {
         val fakeRepo = FakeAccountRepository()
         val fakePrefs = FakeUserPreferencesRepository(initialCurrency = "COP")
         val viewModel = CreateAccountViewModel(
@@ -43,15 +43,18 @@ class CreateAccountViewModelTest {
             preferencesRepository = fakePrefs
         )
 
-        viewModel.updateName("Mi Cuenta Nu")
+        viewModel.updateName("Mi Cuenta de Ahorros")
         viewModel.updateType(AccountType.CUENTA_BANCARIA)
         viewModel.selectInstitution(null)
 
         val success = viewModel.submit()
 
-        assertFalse("El envío debe fallar si falta la institución en cuenta bancaria", success)
-        assertNotNull("Debe registrar un error de institución", viewModel.uiState.value.institutionError)
-        assertEquals(0, fakeRepo.observeAccounts().first().size)
+        assertTrue("El envío debe tener éxito incluso sin institución", success)
+        assertNull("No debe registrar un error de institución", viewModel.uiState.value.institutionError)
+        val accounts = fakeRepo.observeAccounts().first()
+        assertEquals(1, accounts.size)
+        assertEquals("Mi Cuenta de Ahorros", accounts.first().name)
+        assertNull(accounts.first().institutionId)
     }
 
     @Test
