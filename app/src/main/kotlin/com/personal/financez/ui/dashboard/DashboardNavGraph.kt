@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.personal.financez.data.DefaultAccountRepository
 import com.personal.financez.di.AppContainer
+import com.personal.financez.ui.dashboard.components.AccountCard
 import com.personal.financez.ui.dashboard.components.DashboardTopBar
 import com.personal.financez.ui.dashboard.components.EmptyNetWorthMessage
 import com.personal.financez.ui.dashboard.components.NetWorthHeroCard
@@ -168,6 +169,8 @@ private fun DashboardScreenHost(
 
                         1 -> {
                             // Ventana 2: Cuentas (en cuadrícula)
+                            val accounts = if (state is DashboardUiState.Success) state.accounts else emptyList()
+
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
                                 modifier = Modifier
@@ -180,6 +183,10 @@ private fun DashboardScreenHost(
                                     NewAccountPlaceholderCard(
                                         onClick = onAddAccount
                                     )
+                                }
+
+                                items(accounts.size) { index ->
+                                    AccountCard(account = accounts[index])
                                 }
                             }
                         }
